@@ -10,7 +10,6 @@ const useHeaderRouter = ({ title }: { title: string }) => {
         fontSize: 18,
       },
       headerStyles: {
-        height: 50,
         backgroundColor: "#f4511e",
       },
       headerTitle: title,

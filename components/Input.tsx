@@ -2,10 +2,10 @@ import React from "react";
 import { Colors } from "@/constants/Colors";
 import {
   StyleProp,
-  ViewStyle,
   StyleSheet,
   View,
   useColorScheme,
+  TextStyle,
 } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { TextInput, type TextInputProps } from "react-native-paper";
@@ -32,7 +32,7 @@ interface Props extends TextInputProps {
   /**
    * Styles
    */
-  style?: StyleProp<ViewStyle>;
+  style?: StyleProp<TextStyle>;
 }
 
 export default function Input({

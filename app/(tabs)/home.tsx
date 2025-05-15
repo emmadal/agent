@@ -5,7 +5,7 @@ import { getAllStoreByPerson } from "@/api";
 import useToken from "@/hooks/useToken";
 import { useStoreApp } from "@/store";
 import { ThemedView } from "@/components/ThemedView";
-import { GoogleMaps, AppleMaps } from "expo-maps";
+// import { GoogleMaps, AppleMaps } from "expo-maps";
 import { router } from "expo-router";
 import Button from "@/components/Button";
 import { Agency } from "@/types/agency.type";
@@ -51,7 +51,7 @@ const Home = memo(() => {
 
   return (
     <ThemedView style={styles.container}>
-      {Platform.OS === "android" ? <GoogleMaps.View
+      {/* {Platform.OS === "android" ? <GoogleMaps.View
         style={{ flex: 1 }}
         cameraPosition={{
           coordinates: {
@@ -91,7 +91,7 @@ const Home = memo(() => {
         properties={{
           selectionEnabled: true,
         }}
-      />}
+      />} */}
       {data?.length ? <ShowAgency agencies={data} /> : null}
       <Button
         loading={loading}

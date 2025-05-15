@@ -22,22 +22,6 @@ const AgencyCard = ({
 
   return (
     <ThemedView style={styles.card}>
-      {/* <ThemedView>
-        <Image
-          style={styles.image}
-          onLoadStart={() => setLoading(true)}
-          onLoadEnd={() => setLoading(false)}
-          source={{ uri: agency?.picture }}
-          accessibilityLabel="Logo"
-          aria-label={`${agency.name}`}
-          alt={`${agency.name}`}
-        />
-        <ActivityIndicator
-          style={styles.activityIndicator}
-          color={Colors.primaryColor}
-          animating={loading}
-        />
-      </ThemedView> */}
       <ThemedView style={styles.content}>
         <ThemedText type="bold" style={styles.text}>
           {agency.name}

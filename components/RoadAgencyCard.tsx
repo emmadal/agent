@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderRadius: 0,
     elevation: 10,
-    backgroundColor: "#fff",
+    // backgroundColor: "#fff",
     minHeight: 150,
   },
   content: {

@@ -1,7 +1,6 @@
 import React from "react";
 import { Redirect, Stack } from "expo-router";
 import { useStoreApp } from "@/store";
-
 export default function RescueLayout() {
   const session = useStoreApp((state) => state);
 
