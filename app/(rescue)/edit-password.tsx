@@ -10,6 +10,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   useColorScheme,
+  View,
 } from "react-native";
 import { editPasswordSchema } from "@/lib/schema";
 import { useStoreApp } from "@/store";
@@ -19,17 +20,16 @@ import { editPassword } from "@/api";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import useToken from "@/hooks/useToken";
-import useHeaderRouter from "@/hooks/useHeaderRoute";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import * as SecureStore from "expo-secure-store";
 import { Colors } from "@/constants/Colors";
 import { TextInput } from "react-native-paper";
+import { BackHandler } from "@/components/BackHandler";
 
 type Inputs = z.infer<typeof editPasswordSchema>;
 
 const EditPassword = () => {
-  useHeaderRouter({ title: "Modifier le mot de passe" });
   const token = useToken();
   const store = useStoreApp((state) => state);
   const colorScheme = useColorScheme();
@@ -98,92 +98,95 @@ const EditPassword = () => {
       style={styles.keyboard}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          style={styles.container}
-          showsVerticalScrollIndicator={false}
-          contentInsetAdjustmentBehavior="automatic"
-          keyboardShouldPersistTaps="always"
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
-          <ThemedView style={styles.viewInput}>
-            <Controller
-              control={control}
-              name="password"
-              rules={{ required: true }}
-              render={({ field: { onBlur, onChange, value } }) => (
-                <Input
-                  value={value}
-                  onBlur={onBlur}
-                  secure={hide}
-                  onChangeText={onChange}
-                  label="Mot de passe actuel*"
-                  right={
-                    <TextInput.Icon
-                      icon={hide ? "eye-off-outline" : "eye-outline"}
-                      onPress={() => setHide(!hide)}
-                      color={Colors[colorScheme ?? "light"]?.text}
-                    />
-                  }
-                />
-              )}
+        <View style={{ flex: 1, marginTop: 60 }}>
+          <BackHandler title="Modifier le mot de passe" />
+          <ScrollView
+            style={styles.container}
+            showsVerticalScrollIndicator={false}
+            contentInsetAdjustmentBehavior="automatic"
+            keyboardShouldPersistTaps="always"
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
+            <ThemedView style={styles.viewInput}>
+              <Controller
+                control={control}
+                name="password"
+                rules={{ required: true }}
+                render={({ field: { onBlur, onChange, value } }) => (
+                  <Input
+                    value={value}
+                    onBlur={onBlur}
+                    secure={hide}
+                    onChangeText={onChange}
+                    label="Mot de passe actuel*"
+                    right={
+                      <TextInput.Icon
+                        icon={hide ? "eye-off-outline" : "eye-outline"}
+                        onPress={() => setHide(!hide)}
+                        color={Colors[colorScheme ?? "light"]?.text}
+                      />
+                    }
+                  />
+                )}
+              />
+              <ThemedText type="default" style={styles.error}>
+                {errors?.password?.message}
+              </ThemedText>
+            </ThemedView>
+            <ThemedView style={styles.viewInput}>
+              <Controller
+                control={control}
+                name="new_password"
+                rules={{ required: true }}
+                render={({ field: { onBlur, onChange, value } }) => (
+                  <Input
+                    value={value}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    secure={hide2}
+                    label="Nouveau mot de passe*"
+                    right={
+                      <TextInput.Icon
+                        icon={hide2 ? "eye-off-outline" : "eye-outline"}
+                        onPress={() => setHide2(!hide2)}
+                        color={Colors[colorScheme ?? "light"]?.text}
+                      />
+                    }
+                  />
+                )}
+              />
+              <ThemedText type="default" style={styles.error}>
+                {errors?.new_password?.message}
+              </ThemedText>
+            </ThemedView>
+            <ThemedView style={styles.viewInput}>
+              <Controller
+                control={control}
+                name="confirm_password"
+                rules={{ required: true }}
+                render={({ field: { onBlur, onChange, value } }) => (
+                  <Input
+                    value={value}
+                    secure={hide2}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    label="Confirmez le mot de passe*"
+                  />
+                )}
+              />
+              <ThemedText type="default" style={styles.error}>
+                {errors?.confirm_password?.message}
+              </ThemedText>
+            </ThemedView>
+            <Button
+              onPress={handleSubmit(handleForm)}
+              title="Modifier le mot de passe"
+              loading={mutation.isPending || isLoading || isSubmitting}
+              disabled={mutation.isPending || isLoading || isSubmitting}
+              style={styles.button}
             />
-            <ThemedText type="default" style={styles.error}>
-              {errors?.password?.message}
-            </ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.viewInput}>
-            <Controller
-              control={control}
-              name="new_password"
-              rules={{ required: true }}
-              render={({ field: { onBlur, onChange, value } }) => (
-                <Input
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  secure={hide2}
-                  label="Nouveau mot de passe*"
-                  right={
-                    <TextInput.Icon
-                      icon={hide2 ? "eye-off-outline" : "eye-outline"}
-                      onPress={() => setHide2(!hide2)}
-                      color={Colors[colorScheme ?? "light"]?.text}
-                    />
-                  }
-                />
-              )}
-            />
-            <ThemedText type="default" style={styles.error}>
-              {errors?.new_password?.message}
-            </ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.viewInput}>
-            <Controller
-              control={control}
-              name="confirm_password"
-              rules={{ required: true }}
-              render={({ field: { onBlur, onChange, value } }) => (
-                <Input
-                  value={value}
-                  secure={hide2}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  label="Confirmez le mot de passe*"
-                />
-              )}
-            />
-            <ThemedText type="default" style={styles.error}>
-              {errors?.confirm_password?.message}
-            </ThemedText>
-          </ThemedView>
-          <Button
-            onPress={handleSubmit(handleForm)}
-            title="Modifier le mot de passe"
-            loading={mutation.isPending || isLoading || isSubmitting}
-            disabled={mutation.isPending || isLoading || isSubmitting}
-            style={styles.button}
-          />
-        </ScrollView>
+          </ScrollView>
+        </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
@@ -192,7 +195,7 @@ const EditPassword = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
     paddingBottom: 10,
     paddingTop: 30,
   },

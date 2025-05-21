@@ -12,30 +12,29 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   useColorScheme,
+  View,
 } from "react-native";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Snackbar, useTheme } from "react-native-paper";
 import { visitSchema } from "@/lib/schema";
 import { z } from "zod";
 import { useStoreApp } from "@/store";
 import { useLocalSearchParams } from "expo-router";
 import { addVisit, getTypeVisitList, getVisibilityList } from "@/api";
-import { useQueryClient } from "@tanstack/react-query";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import usePosition from "@/hooks/usePosition";
 import useToken from "@/hooks/useToken";
-import useHeaderRouter from "@/hooks/useHeaderRoute";
 import { Colors } from "@/constants/Colors";
 import { today } from "@/lib/today";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
+import { BackHandler } from "@/components/BackHandler";
 
 type Inputs = z.infer<typeof visitSchema>;
 
 const Visit = () => {
   const token = useToken();
-  useHeaderRouter({ title: "" });
   const position = usePosition();
   const theme = useTheme();
   const [visible, setVisible] = useState(false);
@@ -184,11 +183,13 @@ const Visit = () => {
       style={styles.keyboard}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          style={styles.container}
-          showsVerticalScrollIndicator={false}
-          contentInsetAdjustmentBehavior="automatic"
-          keyboardShouldPersistTaps="always"
+        <View style={{ flex: 1, marginTop: 60 }}>
+          <BackHandler title="Nouvelle Visite" />
+          <ScrollView
+            style={styles.container}
+            showsVerticalScrollIndicator={false}
+            contentInsetAdjustmentBehavior="automatic"
+            keyboardShouldPersistTaps="always"
           contentContainerStyle={styles.ContainerStyle}
         >
           <ThemedView style={styles.viewInput}>
@@ -392,7 +393,7 @@ const Visit = () => {
           </ThemedView>
           <Button
             onPress={handleSubmit(handleForm)}
-            title="Enregister la visite"
+            title={`Enregister la visite de ${agency?.name}`}
             loading={mutation.isPending || isLoading || isSubmitting}
             disabled={mutation.isPending || isLoading || isSubmitting}
             style={styles.button}
@@ -404,6 +405,7 @@ const Visit = () => {
             </ThemedText>
           ) : null}
         </ScrollView>
+        </View>
       </TouchableWithoutFeedback>
       <Snackbar
         visible={visible}

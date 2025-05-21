@@ -11,6 +11,7 @@ import {
   Image,
   useColorScheme,
   Pressable,
+  View,
 } from "react-native";
 import { PaperSelect } from "react-native-paper-select";
 import { useTheme } from "react-native-paper";
@@ -24,18 +25,17 @@ import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { ThemedText } from "@/components/ThemedText";
 import useToken from "@/hooks/useToken";
-import useHeaderRouter from "@/hooks/useHeaderRoute";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import useCommunes from "@/hooks/useCommunes";
 import useQuartier from "@/hooks/useQuartier";
 import CustomGooglePlacesInput from "@/components/GooglePlace";
+import { BackHandler } from "@/components/BackHandler";
 
 type Inputs = z.infer<typeof storeSchema>;
 const PHOTO_MAX_SIZE = 10000000; // 10mb
 
 const NewStore = () => {
-  useHeaderRouter({ title: "Ajouter une boutique" });
   const token = useToken();
   const { error, list, selectedList, value } = useCommunes();
   const {
@@ -215,361 +215,371 @@ const NewStore = () => {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      contentInsetAdjustmentBehavior="automatic"
-      keyboardShouldPersistTaps="always"
-      contentContainerStyle={styles.ContainerStyle}
-    >
-      <ThemedView style={styles.viewInput}>
-        <Controller
-          control={control}
-          name="address"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <CustomGooglePlacesInput
-              setValue={setValue}
-              value={value}
-              onBlur={onBlur}
-              onChange={onChange}
-              trigger={trigger}
-            />
-          )}
-        />
-        <ThemedText type="default" style={styles.error}>
-          {errors.address?.message}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={[styles.viewInput, { marginTop: 15 }]}>
-        <ThemedText type="defaultSemiBold" style={styles.label}>
-          Choisissez la commune
-        </ThemedText>
-        <Controller
-          control={control}
-          name="zone_id"
-          render={() => (
-            <PaperSelect
-              dialogStyle={{
-                backgroundColor: "white",
-              }}
-              dialogDoneButtonStyle={{
-                color: Colors.light.text,
-              }}
-              dialogCloseButtonStyle={{
-                color: Colors.light.text,
-              }}
-              textInputOutlineStyle={{
-                backgroundColor:
-                  colorScheme === "dark" ? "transparent" : "white",
-                borderColor: "#DDDDE1",
-                height: 53,
-                // borderRadius: 10,
-              }}
-              label=""
-              value={zone.value}
-              textColor={Colors[colorScheme ?? "light"].text}
-              textInputMode="outlined"
-              textInputProps={{
-                activeOutlineColor: Colors.primaryColor,
-                outlineColor: theme.colors.outline,
-                underlineColor: "transparent",
-              }}
-              checkboxProps={{
-                checkboxMode: "ios",
-                checkboxColor: Colors.primaryColor,
-                checkboxLabelStyle: {
-                  color: Colors.light.text,
-                },
-              }}
-              onSelection={async (value: any) => {
-                setZone({
-                  ...zone,
-                  value: value.text,
-                  selectedList: value.selectedList,
-                  error: "",
-                });
-                setValue("zone_id", value.selectedList[0]?._id);
-                await trigger("zone_id");
-              }}
-              arrayList={list}
-              dialogTitleStyle={styles.dialogTitleStyle}
-              selectedArrayList={selectedList}
-              errorText={error}
-              dialogDoneButtonText="Choisir"
-              dialogCloseButtonText="Fermer"
-              dialogTitle="Choisissez la commune"
-              multiEnable={false}
-              searchText="Rechercher une commune"
-              searchStyle={{
-                backgroundColor: "white",
-                borderRadius: 8,
-                textAlign: "auto",
-              }}
-              searchbarProps={{
-                iconColor: Colors.light.text,
-                placeholderTextColor: "black",
-                textAlign: "auto",
-                underlineColor: "transparent",
-                activeUnderlineColor: "transparent",
-              }}
-            />
-          )}
-        />
-        <ThemedText type="default" style={styles.error}>
-          {errors.zone_id?.message}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.viewInput}>
-        <ThemedText type="defaultSemiBold" style={styles.label}>
-          Choisissez le quartier
-        </ThemedText>
-        <Controller
-          control={control}
-          name="quartier_id"
-          render={() => (
-            <PaperSelect
-              label=""
-              value={town.value}
-              textColor={Colors[colorScheme ?? "light"].text}
-              dialogStyle={{
-                backgroundColor: "white",
-              }}
-              dialogDoneButtonStyle={{
-                color: Colors.light.text,
-              }}
-              dialogCloseButtonStyle={{
-                color: Colors.light.text,
-              }}
-              textInputOutlineStyle={{
-                backgroundColor:
-                  colorScheme === "dark" ? "transparent" : "white",
-                borderColor: "#DDDDE1",
-                height: 53,
-                // borderRadius: 10,
-              }}
-              textInputProps={{
-                activeOutlineColor: Colors.primaryColor,
-                outlineColor: theme.colors.outline,
-                underlineColor: "transparent",
-              }}
-              checkboxProps={{
-                checkboxMode: "ios",
-                checkboxColor: Colors.primaryColor,
-                checkboxLabelStyle: {
-                  color: Colors.light.text,
-                },
-              }}
-              textInputMode="outlined"
-              onSelection={async (value: any) => {
-                setTown({
-                  ...town,
-                  value: value.text,
-                  selectedList: value.selectedList,
-                  error: "",
-                });
-                setValue("quartier_id", value?.selectedList[0]?._id);
-                await trigger("quartier_id");
-              }}
-              arrayList={listQuartier}
-              dialogTitleStyle={styles.dialogTitleStyle}
-              selectedArrayList={selectedListQuartier}
-              errorText={errorQuartier}
-              dialogDoneButtonText="Choisir"
-              dialogTitle="Choisissez le quartier"
-              dialogCloseButtonText="Fermer"
-              multiEnable={false}
-              searchText="Rechercher un quartier"
-              searchStyle={{
-                backgroundColor: "transparent",
-                borderColor: Colors.light.text,
-                borderWidth: 1,
-                borderRadius: 8,
-                textAlign: "auto",
-              }}
-              searchbarProps={{
-                iconColor: Colors.light.text,
-                placeholderTextColor: "black",
-                textAlign: "auto",
-                underlineColor: "transparent",
-                activeUnderlineColor: "transparent",
-              }}
-            />
-          )}
-        />
-        <ThemedText type="default" style={styles.error}>
-          {errors.quartier_id?.message}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.viewInput}>
-        <Controller
-          control={control}
-          name="name"
-          rules={{ required: true }}
-          render={({ field: { onBlur, onChange, value } }) => (
-            <Input
-              value={value}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              label="Entrez le nom de la boutique*"
-            />
-          )}
-        />
-        <ThemedText type="default" style={styles.error}>
-          {errors?.name?.message}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.viewInput}>
-        <Controller
-          control={control}
-          name="phone_boutique"
-          rules={{ required: true }}
-          render={({ field: { onBlur, onChange, value } }) => (
-            <Input
-              value={value}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              label="Entrez le contact de la boutique*"
-            />
-          )}
-        />
-        <ThemedText type="default" style={styles.error}>
-          {errors?.phone_boutique?.message}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.viewInput}>
-        <Controller
-          control={control}
-          name="name_gerant"
-          rules={{ required: true }}
-          render={({ field: { onBlur, onChange, value } }) => (
-            <Input
-              value={value}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              label="Entrez le nom du gestionnaire*"
-            />
-          )}
-        />
-        <ThemedText type="default" style={styles.error}>
-          {errors?.name_gerant?.message}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.viewInput}>
-        <Controller
-          control={control}
-          name="phone_gerant"
-          rules={{ required: true }}
-          render={({ field: { onBlur, onChange, value } }) => (
-            <Input
-              value={value}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              label="Entrez le contact du gestionnaire*"
-              keyboardType="phone-pad"
-            />
-          )}
-        />
-        <ThemedText type="default" style={styles.error}>
-          {errors?.phone_gerant?.message}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.viewInput}>
-        <Controller
-          control={control}
-          name="description"
-          rules={{ required: true }}
-          render={({ field: { onBlur, onChange, value } }) => (
-            <Input
-              value={value}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              label="Entrez la description de la boutique*"
-              style={styles.descInput}
-              maxLength={250}
-              multiline
-            />
-          )}
-        />
-        <ThemedText type="default" style={styles.error}>
-          {errors?.description?.message}
-        </ThemedText>
-        <ThemedText type="default" style={styles.count}>
-          {watch("description")?.length ?? 0}/250
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.viewInput}>
-        {watch("picture") ? (
-          <ThemedView style={styles.row}>
-            <Image
-              source={{ uri: watch("picture") }}
-              style={styles.preview}
-              resizeMode="cover"
-            />
-
-            <Pressable
-              style={styles.button}
-              onPress={() => {
-                setValue("picture", "");
-                trigger("picture");
-              }}
-            >
-              <ThemedText type="defaultSemiBold">Supprimez la photo</ThemedText>
-            </Pressable>
-          </ThemedView>
-        ) : (
-          <TouchableOpacity
-            style={[
-              styles.upload,
-              {
-                backgroundColor: "transparent",
-                borderColor: Colors[colorScheme ?? "light"]?.icon,
-              },
-            ]}
-            onPress={processFile}
-            disabled={loading}
-          >
-            <ThemedText
-              type="default"
-              style={{
-                color: Colors[colorScheme ?? "light"]?.text,
-              }}
-            >
-              Télécharger la photo de la boutique*
-            </ThemedText>
-            {loading ? (
-              <ActivityIndicator
-                animating={loading}
-                color={Colors.primaryColor}
+    <View style={styles.container}>
+      <BackHandler title="Ajouter une nouvelle boutique" />
+      <ScrollView
+        style={styles.Scrollcontainer}
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+        keyboardShouldPersistTaps="always"
+        contentContainerStyle={styles.ContainerStyle}
+      >
+        <ThemedView style={styles.viewInput}>
+          <Controller
+            control={control}
+            name="address"
+            render={({ field: { onBlur, onChange, value } }) => (
+              <CustomGooglePlacesInput
+                setValue={setValue}
+                value={value}
+                onBlur={onBlur}
+                onChange={onChange}
+                trigger={trigger}
               />
-            ) : null}
-          </TouchableOpacity>
-        )}
+            )}
+          />
+          <ThemedText type="default" style={styles.error}>
+            {errors.address?.message}
+          </ThemedText>
+        </ThemedView>
+        <ThemedView style={[styles.viewInput, { marginTop: 15 }]}>
+          <ThemedText type="defaultSemiBold" style={styles.label}>
+            Choisissez la commune
+          </ThemedText>
+          <Controller
+            control={control}
+            name="zone_id"
+            render={() => (
+              <PaperSelect
+                dialogStyle={{
+                  backgroundColor: "white",
+                }}
+                dialogDoneButtonStyle={{
+                  color: Colors.light.text,
+                }}
+                dialogCloseButtonStyle={{
+                  color: Colors.light.text,
+                }}
+                textInputOutlineStyle={{
+                  backgroundColor:
+                    colorScheme === "dark" ? "transparent" : "white",
+                  borderColor: "#DDDDE1",
+                  height: 53,
+                  // borderRadius: 10,
+                }}
+                label=""
+                value={zone.value}
+                textColor={Colors[colorScheme ?? "light"].text}
+                textInputMode="outlined"
+                textInputProps={{
+                  activeOutlineColor: Colors.primaryColor,
+                  outlineColor: theme.colors.outline,
+                  underlineColor: "transparent",
+                }}
+                checkboxProps={{
+                  checkboxMode: "ios",
+                  checkboxColor: Colors.primaryColor,
+                  checkboxLabelStyle: {
+                    color: Colors.light.text,
+                  },
+                }}
+                onSelection={async (value: any) => {
+                  setZone({
+                    ...zone,
+                    value: value.text,
+                    selectedList: value.selectedList,
+                    error: "",
+                  });
+                  setValue("zone_id", value.selectedList[0]?._id);
+                  await trigger("zone_id");
+                }}
+                arrayList={list}
+                dialogTitleStyle={styles.dialogTitleStyle}
+                selectedArrayList={selectedList}
+                errorText={error}
+                dialogDoneButtonText="Choisir"
+                dialogCloseButtonText="Fermer"
+                dialogTitle="Choisissez la commune"
+                multiEnable={false}
+                searchText="Rechercher une commune"
+                searchStyle={{
+                  backgroundColor: "white",
+                  borderRadius: 8,
+                  textAlign: "auto",
+                }}
+                searchbarProps={{
+                  iconColor: Colors.light.text,
+                  placeholderTextColor: "black",
+                  textAlign: "auto",
+                  underlineColor: "transparent",
+                  activeUnderlineColor: "transparent",
+                }}
+              />
+            )}
+          />
+          <ThemedText type="default" style={styles.error}>
+            {errors.zone_id?.message}
+          </ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.viewInput}>
+          <ThemedText type="defaultSemiBold" style={styles.label}>
+            Choisissez le quartier
+          </ThemedText>
+          <Controller
+            control={control}
+            name="quartier_id"
+            render={() => (
+              <PaperSelect
+                label=""
+                value={town.value}
+                textColor={Colors[colorScheme ?? "light"].text}
+                dialogStyle={{
+                  backgroundColor: "white",
+                }}
+                dialogDoneButtonStyle={{
+                  color: Colors.light.text,
+                }}
+                dialogCloseButtonStyle={{
+                  color: Colors.light.text,
+                }}
+                textInputOutlineStyle={{
+                  backgroundColor:
+                    colorScheme === "dark" ? "transparent" : "white",
+                  borderColor: "#DDDDE1",
+                  height: 53,
+                  // borderRadius: 10,
+                }}
+                textInputProps={{
+                  activeOutlineColor: Colors.primaryColor,
+                  outlineColor: theme.colors.outline,
+                  underlineColor: "transparent",
+                }}
+                checkboxProps={{
+                  checkboxMode: "ios",
+                  checkboxColor: Colors.primaryColor,
+                  checkboxLabelStyle: {
+                    color: Colors.light.text,
+                  },
+                }}
+                textInputMode="outlined"
+                onSelection={async (value: any) => {
+                  setTown({
+                    ...town,
+                    value: value.text,
+                    selectedList: value.selectedList,
+                    error: "",
+                  });
+                  setValue("quartier_id", value?.selectedList[0]?._id);
+                  await trigger("quartier_id");
+                }}
+                arrayList={listQuartier}
+                dialogTitleStyle={styles.dialogTitleStyle}
+                selectedArrayList={selectedListQuartier}
+                errorText={errorQuartier}
+                dialogDoneButtonText="Choisir"
+                dialogTitle="Choisissez le quartier"
+                dialogCloseButtonText="Fermer"
+                multiEnable={false}
+                searchText="Rechercher un quartier"
+                searchStyle={{
+                  backgroundColor: "transparent",
+                  borderColor: Colors.light.text,
+                  borderWidth: 1,
+                  borderRadius: 8,
+                  textAlign: "auto",
+                }}
+                searchbarProps={{
+                  iconColor: Colors.light.text,
+                  placeholderTextColor: "black",
+                  textAlign: "auto",
+                  underlineColor: "transparent",
+                  activeUnderlineColor: "transparent",
+                }}
+              />
+            )}
+          />
+          <ThemedText type="default" style={styles.error}>
+            {errors.quartier_id?.message}
+          </ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.viewInput}>
+          <Controller
+            control={control}
+            name="name"
+            rules={{ required: true }}
+            render={({ field: { onBlur, onChange, value } }) => (
+              <Input
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                label="Entrez le nom de la boutique*"
+              />
+            )}
+          />
+          <ThemedText type="default" style={styles.error}>
+            {errors?.name?.message}
+          </ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.viewInput}>
+          <Controller
+            control={control}
+            name="phone_boutique"
+            rules={{ required: true }}
+            render={({ field: { onBlur, onChange, value } }) => (
+              <Input
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                label="Entrez le contact de la boutique*"
+              />
+            )}
+          />
+          <ThemedText type="default" style={styles.error}>
+            {errors?.phone_boutique?.message}
+          </ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.viewInput}>
+          <Controller
+            control={control}
+            name="name_gerant"
+            rules={{ required: true }}
+            render={({ field: { onBlur, onChange, value } }) => (
+              <Input
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                label="Entrez le nom du gestionnaire*"
+              />
+            )}
+          />
+          <ThemedText type="default" style={styles.error}>
+            {errors?.name_gerant?.message}
+          </ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.viewInput}>
+          <Controller
+            control={control}
+            name="phone_gerant"
+            rules={{ required: true }}
+            render={({ field: { onBlur, onChange, value } }) => (
+              <Input
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                label="Entrez le contact du gestionnaire*"
+                keyboardType="phone-pad"
+              />
+            )}
+          />
+          <ThemedText type="default" style={styles.error}>
+            {errors?.phone_gerant?.message}
+          </ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.viewInput}>
+          <Controller
+            control={control}
+            name="description"
+            rules={{ required: true }}
+            render={({ field: { onBlur, onChange, value } }) => (
+              <Input
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                label="Entrez la description de la boutique*"
+                style={styles.descInput}
+                maxLength={250}
+                multiline
+              />
+            )}
+          />
+          <ThemedText type="default" style={styles.error}>
+            {errors?.description?.message}
+          </ThemedText>
+          <ThemedText type="default" style={styles.count}>
+            {watch("description")?.length ?? 0}/250
+          </ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.viewInput}>
+          {watch("picture") ? (
+            <ThemedView style={styles.row}>
+              <Image
+                source={{ uri: watch("picture") }}
+                style={styles.preview}
+                resizeMode="cover"
+              />
 
-        <ThemedText type="default" style={styles.error}>
-          {errors.picture?.message}
-        </ThemedText>
-      </ThemedView>
-      {(mutation.isError && mutation?.error) || errors.root?.message ? (
-        <ThemedText type="default" style={styles.errorupdate}>
-          {mutation.error?.message || errors?.root?.message}
-        </ThemedText>
-      ) : null}
-      <Button
-        onPress={handleSubmit(handleForm)}
-        title="Ajouter une nouvelle boutique"
-        loading={mutation.isPending || isLoading || isSubmitting}
-        disabled={mutation.isPending || isLoading || isSubmitting}
-        style={styles.button}
-      />
-    </ScrollView>
+              <Pressable
+                style={styles.button}
+                onPress={() => {
+                  setValue("picture", "");
+                  trigger("picture");
+                }}
+              >
+                <ThemedText type="defaultSemiBold">
+                  Supprimez la photo
+                </ThemedText>
+              </Pressable>
+            </ThemedView>
+          ) : (
+            <TouchableOpacity
+              style={[
+                styles.upload,
+                {
+                  backgroundColor: "transparent",
+                  borderColor: Colors[colorScheme ?? "light"]?.icon,
+                },
+              ]}
+              onPress={processFile}
+              disabled={loading}
+            >
+              <ThemedText
+                type="default"
+                style={{
+                  color: Colors[colorScheme ?? "light"]?.text,
+                }}
+              >
+                Télécharger la photo de la boutique*
+              </ThemedText>
+              {loading ? (
+                <ActivityIndicator
+                  animating={loading}
+                  color={Colors.primaryColor}
+                />
+              ) : null}
+            </TouchableOpacity>
+          )}
+
+          <ThemedText type="default" style={styles.error}>
+            {errors.picture?.message}
+          </ThemedText>
+        </ThemedView>
+        {(mutation.isError && mutation?.error) || errors.root?.message ? (
+          <ThemedText type="default" style={styles.errorupdate}>
+            {mutation.error?.message || errors?.root?.message}
+          </ThemedText>
+        ) : null}
+        <Button
+          onPress={handleSubmit(handleForm)}
+          title="Ajouter une nouvelle boutique"
+          loading={mutation.isPending || isLoading || isSubmitting}
+          disabled={mutation.isPending || isLoading || isSubmitting}
+          style={styles.button}
+        />
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    paddingBottom: 10,
+    paddingTop: 60,
+  },
+  Scrollcontainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    marginTop: 20,
   },
   ContainerStyle: {
     flexGrow: 1,

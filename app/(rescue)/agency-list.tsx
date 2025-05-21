@@ -1,17 +1,16 @@
 import React, { useMemo } from "react";
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import Animated from "react-native-reanimated";
 import RoadAgencyCard from "@/components/RoadAgencyCard";
 import { ThemedView } from "@/components/ThemedView";
 import useToken from "@/hooks/useToken";
-import useHeaderRouter from "@/hooks/useHeaderRoute";
 import useMarket from "@/hooks/useMarket";
 import SuspenseView from "@/components/SuspenseView";
 import { Searchbar } from "react-native-paper";
 import { Colors } from "@/constants/Colors";
+import { BackHandler } from "@/components/BackHandler";
 
 const AgencyList = () => {
-  useHeaderRouter({ title: "Boutiques trouvées" });
   useToken();
   const { data, error, isError, isPending, refetch } = useMarket();
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -29,6 +28,7 @@ const AgencyList = () => {
 
   return (
     <ThemedView style={styles.container}>
+      <BackHandler title="Boutiques trouvées" />
       <Searchbar
         placeholder="Rechercher une boutique"
         onChangeText={setSearchQuery}
@@ -65,7 +65,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "transparent",
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 60,
   },
   ContainerStyle: {
     flexGrow: 1,
@@ -76,6 +77,8 @@ const styles = StyleSheet.create({
     borderColor: "#808080",
     borderWidth: 1,
     borderRadius: 5,
+    width: Dimensions.get("window").width / 1.2,
+    alignSelf: "center",
   },
 });
 export default AgencyList;

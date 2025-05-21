@@ -71,6 +71,9 @@ const Home = memo(() => {
         properties={{
           isMyLocationEnabled: true,
         }}
+        uiSettings={{
+          zoomControlsEnabled: false,
+        }}
       /> : <AppleMaps.View
         style={{ flex: 1 }}
         cameraPosition={{

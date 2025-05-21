@@ -10,5 +10,5 @@ export default function RescueLayout() {
     return <Redirect key="login" href="/" />;
   }
 
-  return <Stack />;
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

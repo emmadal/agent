@@ -5,11 +5,9 @@ import React from "react";
 import { Alert, Dimensions, Linking, StyleSheet } from "react-native";
 import { Button as BtnRN } from "react-native-paper";
 import Button from "@/components/Button";
-import useHeaderRouter from "@/hooks/useHeaderRoute";
+import { BackHandler } from "@/components/BackHandler";
 
 const Support = () => {
-  useHeaderRouter({ title: "Support" });
-
   const handleLink = async (link: string) => {
     const canOpen = await Linking.canOpenURL(link);
     if (canOpen) {
@@ -24,9 +22,7 @@ const Support = () => {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="subtitle" style={styles.title}>
-        Centre de Relation Client
-      </ThemedText>
+      <BackHandler title="Centre de Relation Client" />
       <ThemedView style={styles.content}>
         <Button
           icon="phone"
@@ -66,19 +62,11 @@ const Support = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 30,
-    backgroundColor: "transparent",
-  },
-  ContainerStyle: {
-    flexGrow: 1,
-  },
-  title: {
-    fontWeight: "700",
+    paddingTop:  60
   },
   content: {
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "transparent",
     marginTop: 50,
   },
   button: {

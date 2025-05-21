@@ -224,6 +224,8 @@ const CustomGooglePlacesInput = ({
         onChangeText={handleTextChange}
         onBlur={handleBlur}
         onFocus={handleFocus}
+        readOnly
+        clearButtonMode='while-editing'
         right={<TextInput.Icon icon="google-maps" onPress={setCurrentPosition} />}
         style={{
           width: '100%',

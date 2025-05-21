@@ -9,22 +9,22 @@ import {
   Pressable,
   useColorScheme,
   ActivityIndicator,
+  View,
 } from "react-native";
 import useOneVisitByDate from "@/hooks/useOneVisitByDate";
-import { getPreciseDistance } from "geolib";
+import { getPreciseDistance, convertDistance } from "geolib";
 import useToken from "@/hooks/useToken";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useLocalSearchParams, router } from "expo-router";
-import useHeaderRouter from "@/hooks/useHeaderRoute";
 import { Colors } from "@/constants/Colors";
 import usePosition from "@/hooks/usePosition";
 import Button from "@/components/Button";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { Image } from "expo-image";
+import { BackHandler } from "@/components/BackHandler";
 
 const RoadAgency = () => {
-  useHeaderRouter({ title: "" });
   const colorScheme = useColorScheme();
   useToken();
   const params = useLocalSearchParams();
@@ -44,87 +44,87 @@ const RoadAgency = () => {
   };
 
   useEffect(() => {
-    const calculateDistance = async () => {
-      if (
-        !position?.latitude ||
-        !position?.longitude ||
-        !agency?.latitude ||
-        !agency?.longitude
-      )
-        return;
+    // const calculateDistance = async () => {
+    //   if (
+    //     !position?.latitude ||
+    //     !position?.longitude ||
+    //     !agency?.latitude ||
+    //     !agency?.longitude
+    //   )
+    //     return;
 
-      setLoading(true);
-      try {
-        const apiKey = process.env.EXPO_PUBLIC_MAPS_API;
+    //   setLoading(true);
+    //   try {
+    //     const apiKey = process.env.EXPO_PUBLIC_MAPS_API;
 
-        if (!apiKey) {
-          console.error("Google Maps API key is missing");
-          fallbackToGeolibDistance();
-          return;
-        }
+    //     if (!apiKey) {
+    //       console.error("Google Maps API key is missing");
+    //       fallbackToGeolibDistance();
+    //       return;
+    //     }
 
-        // Using Routes API v2 instead of the legacy Distance Matrix API
-        const url = `https://routes.googleapis.com/directions/v2:computeRoutes`;
+    //     // Using Routes API v2 instead of the legacy Distance Matrix API
+    //     const url = `https://routes.googleapis.com/directions/v2:computeRoutes`;
 
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Goog-Api-Key": apiKey,
-            "X-Goog-FieldMask":
-              "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline",
-          },
-          body: JSON.stringify({
-            origin: {
-              location: {
-                latLng: {
-                  latitude: position.latitude,
-                  longitude: position.longitude,
-                },
-              },
-            },
-            destination: {
-              location: {
-                latLng: {
-                  latitude: agency.latitude,
-                  longitude: agency.longitude,
-                },
-              },
-            },
-            travelMode: "DRIVE",
-          }),
-        });
+    //     const response = await fetch(url, {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         "X-Goog-Api-Key": apiKey,
+    //         "X-Goog-FieldMask":
+    //           "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline",
+    //       },
+    //       body: JSON.stringify({
+    //         origin: {
+    //           location: {
+    //             latLng: {
+    //               latitude: position.latitude,
+    //               longitude: position.longitude,
+    //             },
+    //           },
+    //         },
+    //         destination: {
+    //           location: {
+    //             latLng: {
+    //               latitude: agency.latitude,
+    //               longitude: agency.longitude,
+    //             },
+    //           },
+    //         },
+    //         travelMode: "WALKING",
+    //       }),
+    //     });
 
-        const data = await response.json();
+    //     const data = await response.json();
 
-        if (response.ok && data.routes && data.routes.length > 0) {
-          const route = data.routes[0];
-          // Format duration from seconds to human-readable text
-          const durationInSeconds = route.duration.replace("s", "");
-          const minutes = Math.floor(durationInSeconds / 60);
-          const hours = Math.floor(minutes / 60);
-          const remainingMinutes = minutes % 60;
+    //     if (response.ok && data.routes && data.routes.length > 0) {
+    //       const route = data.routes[0];
+    //       // Format duration from seconds to human-readable text
+    //       const durationInSeconds = route.duration.replace("s", "");
+    //       const minutes = Math.floor(durationInSeconds / 60);
+    //       const hours = Math.floor(minutes / 60);
+    //       const remainingMinutes = minutes % 60;
 
-          const durationText =
-            hours > 0
-              ? `${hours} hr ${remainingMinutes} min`
-              : `${minutes} min`;
-         
-          setRoute({
-            distanceMeters: route.distanceMeters,
-            duration: durationText,
-          });
-        } else {
-          console.error("Routes API error:", data.error || "Unknown error");
-          fallbackToGeolibDistance();
-        }
-      } catch (error) {
-        console.error("Error fetching route data:", error);
-        fallbackToGeolibDistance();
-      } finally {
-        setLoading(false);
-      }
-    };
+    //       const durationText =
+    //         hours > 0
+    //           ? `${hours} hr ${remainingMinutes} min`
+    //           : `${minutes} min`;
+
+    //       setRoute({
+    //         distanceMeters: route.distanceMeters,
+    //         duration: durationText,
+    //       });
+    //     } else {
+    //       console.error("Routes API error:", data.error || "Unknown error");
+    //       fallbackToGeolibDistance();
+    //     }
+    //   } catch (error) {
+    //     console.error("Error fetching route data:", error);
+    //     fallbackToGeolibDistance();
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
 
     const fallbackToGeolibDistance = () => {
       const point1 = {
@@ -149,7 +149,7 @@ const RoadAgency = () => {
       agency?.latitude &&
       agency?.longitude
     ) {
-      calculateDistance();
+      fallbackToGeolibDistance();
     }
   }, [
     agency?.latitude,
@@ -173,115 +173,119 @@ const RoadAgency = () => {
 
   const processDistance = () => {
     if (route?.distanceMeters >= 1000) {
-      const result = Number(route?.distanceMeters / 1000).toFixed(3);
-      return `${result} km`;
+      const result = convertDistance(route?.distanceMeters, "km");
+      return `${result.toFixed(3)} km`;
     }
     return `${route?.distanceMeters || 0} m`;
   };
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      showsVerticalScrollIndicator={false}
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={styles.contentContainer}
-    >
-      <ThemedView style={styles.header}>
-        <ThemedText type="bold">{agency?.name}</ThemedText>
-        <Button
-          title="Appeler le gestionnaire"
-          style={styles.call}
-          onPress={() => handleCall(`tel:${agency?.phone_gerant}`)}
-          icon="phone"
-        />
-      </ThemedView>
-      <ThemedView
-        style={[
-          styles.info,
-          {
-            backgroundColor: colorScheme === "light" ? "white" : "transparent",
-          },
-        ]}
+    <View style={{ flex: 1, marginTop: 60 }}>
+      <BackHandler title={agency?.name} />
+      <ScrollView
+        style={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.contentContainer}
       >
-        <ThemedView style={styles.viewaddress}>
-          <Icon
-            name="map-marker"
-            size={17}
-            color={Colors[colorScheme ?? "light"].text}
-          />
-          <ThemedText type="default">{agency?.address}</ThemedText>
-        </ThemedView>
-        <ThemedView style={styles.data}>
-          <ThemedView style={styles.row}>
-            <ThemedText type="default">Distance</ThemedText>
-            <ThemedText type="bold">{processDistance()}</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.row}>
-            <ThemedText type="default">Durée du trajet</ThemedText>
-            <ThemedText type="bold">{route?.duration}</ThemedText>
-          </ThemedView>
+        <ThemedView style={styles.header}>
+          <ThemedText type="bold">{agency?.name}</ThemedText>
           <Button
-            title="Contacter la boutique"
-            style={[styles.call, { marginTop: 20 }]}
-            onPress={() => handleCall(`tel:${agency?.phone_boutique}`)}
+            title="Appeler le gestionnaire"
+            style={styles.call}
+            onPress={() => handleCall(`tel:${agency?.phone_gerant}`)}
             icon="phone"
           />
         </ThemedView>
-      </ThemedView>
+        <ThemedView
+          style={[
+            styles.info,
+            {
+              backgroundColor:
+                colorScheme === "light" ? "white" : "transparent",
+            },
+          ]}
+        >
+          <ThemedView style={styles.viewaddress}>
+            <Icon
+              name="map-marker"
+              size={17}
+              color={Colors[colorScheme ?? "light"].text}
+            />
+            <ThemedText type="default">{agency?.address}</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.data}>
+            <ThemedView style={styles.row}>
+              <ThemedText type="default">Distance</ThemedText>
+              <ThemedText type="bold">{processDistance()}</ThemedText>
+            </ThemedView>
+            <ThemedView style={styles.row}>
+              <ThemedText type="default">Durée du trajet</ThemedText>
+              <ThemedText type="bold">{route?.duration}</ThemedText>
+            </ThemedView>
+            <Button
+              title="Contacter la boutique"
+              style={[styles.call, { marginTop: 20 }]}
+              onPress={() => handleCall(`tel:${agency?.phone_boutique}`)}
+              icon="phone"
+            />
+          </ThemedView>
+        </ThemedView>
 
-      {data && data?.data?.length ? null : (
-        <Pressable style={styles.distance}>
-          <ThemedText
-            lightColor={Colors.primaryColor}
-            darkColor={Colors.primaryColor}
-            type="defaultSemiBold"
-            onPress={openGoogleMaps}
-          >
-            Commencez le trajet
-          </ThemedText>
-        </Pressable>
-      )}
-      <Image
-        source={{ uri: agency?.picture }}
-        accessibilityLabel="logo-agency"
-        aria-label="logo-agency"
-        alt="logo-agency"
-        testID="logo-agency"
-        style={styles.storeImg}
-        onLoadStart={() => setLoading(true)}
-        onLoadEnd={() => setLoading(false)}
-      />
-      <ActivityIndicator
-        style={styles.activityIndicator}
-        color={Colors.primaryColor}
-        animating={loading}
-      />
-
-      <ThemedText type="default" style={{ marginTop: 10 }}>
-        {agency?.description}
-      </ThemedText>
-      {data && data?.data?.length ? (
-        <ThemedText type="defaultSemiBold" style={styles.textVisit}>
-          Vous avez déjà effectuée une visite aujourd&apos;hui.
-        </ThemedText>
-      ) : !route?.distanceMeters || Number(route?.distanceMeters) > 200 ? (
-        <ThemedText type="defaultSemiBold" style={styles.errorVisit}>
-          Vous ne pouvez pas effectuer de visite. Veuillez vous rapprochez de la
-          boutique.
-        </ThemedText>
-      ) : (
-        <Button
-          style={styles.Viewbtn}
-          title="Commencer la visite"
-          onPress={() =>
-            router.navigate({
-              pathname: "/visit",
-              params: { store: JSON.stringify(agency) },
-            })
-          }
+        {data && data?.data?.length ? null : (
+          <Pressable style={styles.distance}>
+            <ThemedText
+              lightColor={Colors.primaryColor}
+              darkColor={Colors.primaryColor}
+              type="defaultSemiBold"
+              onPress={openGoogleMaps}
+            >
+              Commencez le trajet
+            </ThemedText>
+          </Pressable>
+        )}
+        <Image
+          source={{ uri: agency?.picture }}
+          accessibilityLabel="logo-agency"
+          aria-label="logo-agency"
+          alt="logo-agency"
+          testID="logo-agency"
+          style={styles.storeImg}
+          onLoadStart={() => setLoading(true)}
+          onLoadEnd={() => setLoading(false)}
         />
-      )}
-    </ScrollView>
+        <ActivityIndicator
+          style={styles.activityIndicator}
+          color={Colors.primaryColor}
+          animating={loading}
+        />
+
+        <ThemedText type="default" style={{ marginTop: 10 }}>
+          {agency?.description}
+        </ThemedText>
+        {data && data?.data?.length ? (
+          <ThemedText type="defaultSemiBold" style={styles.textVisit}>
+            Vous avez déjà effectuée une visite aujourd&apos;hui.
+          </ThemedText>
+        ) : !route?.distanceMeters || route?.distanceMeters > 100 ? (
+          <ThemedText type="defaultSemiBold" style={styles.errorVisit}>
+            Vous ne pouvez pas effectuer de visite. Veuillez vous rapprochez de
+            la boutique.
+          </ThemedText>
+        ) : (
+          <Button
+            style={styles.Viewbtn}
+            title="Commencer la visite"
+            onPress={() =>
+              router.navigate({
+                pathname: "/visit",
+                params: { store: JSON.stringify(agency) },
+              })
+            }
+          />
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
@@ -360,10 +364,11 @@ const styles = StyleSheet.create({
   viewaddress: {
     backgroundColor: "transparent",
     flexDirection: "row",
-    justifyContent: "space-evenly",
+    gap: 5,
     marginVertical: 10,
     alignItems: "center",
     flexWrap: "wrap",
+    alignSelf: "center",
   },
   activityIndicator: {
     position: "absolute",
