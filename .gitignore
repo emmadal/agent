@@ -27,6 +27,8 @@ ios/
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+package-lock.json
+yarn.lock
 
 # macOS
 .DS_Store
