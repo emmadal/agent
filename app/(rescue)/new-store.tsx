@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -20,7 +20,7 @@ import { storeSchema } from "@/lib/schema";
 import { useStoreApp } from "@/store";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { addStore, uploadCldFile } from "@/api";
+import { addStore, uploadFile } from "@/api";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { ThemedText } from "@/components/ThemedText";
@@ -31,12 +31,15 @@ import useCommunes from "@/hooks/useCommunes";
 import useQuartier from "@/hooks/useQuartier";
 import CustomGooglePlacesInput from "@/components/GooglePlace";
 import { BackHandler } from "@/components/BackHandler";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import Icon from "@expo/vector-icons/Feather";
 
 type Inputs = z.infer<typeof storeSchema>;
-const PHOTO_MAX_SIZE = 10000000; // 10mb
+const PHOTO_MAX_SIZE = 10 * 1024 * 1024; // 10mb
 
 const NewStore = () => {
   const token = useToken();
+  const sheetRef = useRef<BottomSheet>(null);
   const { error, list, selectedList, value } = useCommunes();
   const {
     error: errorQuartier,
@@ -47,6 +50,7 @@ const NewStore = () => {
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
   const store = useStoreApp((state) => state);
+  const snapPoints = useMemo(() => ["20%", "25%"], []);
   const colorScheme = useColorScheme();
   const [zone, setZone] = useState({
     value,
@@ -75,10 +79,16 @@ const NewStore = () => {
     mode: "onChange",
   });
 
+  const handleSnapPress = useCallback(() => {
+    sheetRef.current?.expand();
+  }, []);
+
+  const handleClosePress = useCallback(() => {
+    sheetRef.current?.forceClose();
+  }, []);
+
   // start phone camera
-  const launchCamera = async (): Promise<
-    ImagePicker.ImagePickerAsset | undefined
-  > => {
+  const launchCamera = async () => {
     // request camera permissions
     const permission = await ImagePicker.getCameraPermissionsAsync();
     if (permission.status !== "granted") {
@@ -89,20 +99,37 @@ const NewStore = () => {
       aspect: [4, 3],
       quality: 1,
     });
-    return camera.assets?.[0];
+    handleClosePress();
+    if (camera?.assets?.[0]) {
+      await processFile(camera?.assets?.[0]);
+    }
+    return;
   };
 
-  // upload file
-  const processFile = async () => {
-    const camera = await launchCamera();
-    let formData: FormData = new FormData();
-    formData.append(
-      "upload_preset",
-      `${process.env.EXPO_PUBLIC_UPLOAD_PRESET}`,
-    );
-    formData.append("api_key", `${process.env.EXPO_PUBLIC_CLOUD_API_KEY}`);
+  // start image library camera
+  const launchImageLibrary = async () => {
+    // request camera permissions
+    const permission = await ImagePicker.getMediaLibraryPermissionsAsync();
+    if (permission.status !== "granted") {
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    }
+    const media = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      selectionLimit: 1,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    handleClosePress();
+    if (media?.assets?.[0]) {
+      await processFile(media?.assets?.[0]);
+    }
+    return;
+  };  
 
-    if (camera?.fileSize! > PHOTO_MAX_SIZE) {
+  // upload file
+  const processFile = async (image: ImagePicker.ImagePickerAsset) => {
+    let formData: FormData = new FormData();
+    if (image?.fileSize! > PHOTO_MAX_SIZE) {
       Alert.alert(
         "Fichier volumineux",
         "Veuillez choisir une image en dessous de 10MB",
@@ -110,35 +137,28 @@ const NewStore = () => {
       return;
     }
 
-    if (camera?.uri) {
+    if (image?.uri) {
       setLoading(!loading);
-      formData.append("file", {
-        uri: camera?.uri!,
-        type: camera?.mimeType!,
-        name: camera?.fileName!,
+      formData.append("picture", {
+        name: image?.fileName!,
+        uri: image?.uri!,
+        type: image?.mimeType!,
       } as any);
 
-      const cldName = process.env.EXPO_PUBLIC_CLOUD_NAME as string;
-
       // send data file to the server
-      const response = await uploadCldFile(formData, cldName);
-      if (response?.code !== 200) {
+      const response = await uploadFile(formData, token || store?.token);
+      if (response?.code !== 201) {
         setError("root", {
           message: "Impossible de télécharger la photo",
         });
         setLoading(false);
         return;
       }
-      if (response?.code === 200) {
-        setValue("picture", response?.file);
-        setLoading(false);
-        trigger("picture");
-        return;
-      }
+      setValue("picture", response?.path);
       setLoading(false);
+      trigger("picture");
       return;
     }
-    return;
   };
 
   const returnData = (input: Inputs) => {
@@ -529,7 +549,7 @@ const NewStore = () => {
                   borderColor: Colors[colorScheme ?? "light"]?.icon,
                 },
               ]}
-              onPress={processFile}
+              onPress={handleSnapPress}
               disabled={loading}
             >
               <ThemedText
@@ -566,6 +586,30 @@ const NewStore = () => {
           style={styles.button}
         />
       </ScrollView>
+      <BottomSheet
+        ref={sheetRef}
+        index={-1}
+        snapPoints={snapPoints}
+        enablePanDownToClose
+      >
+        <BottomSheetView
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 25,
+          }}
+        >
+          <TouchableOpacity onPress={launchCamera} style={styles.sheetButon}>
+            <ThemedText type="subtitle">Prendre une photo</ThemedText>
+            <Icon name="camera" size={25} color="red" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={launchImageLibrary} style={styles.sheetButon}>
+            <ThemedText type="subtitle">Choisir une photo</ThemedText>
+            <Icon name="image" size={25} color="green" />
+          </TouchableOpacity>
+        </BottomSheetView>
+      </BottomSheet>
     </View>
   );
 };
@@ -651,6 +695,11 @@ const styles = StyleSheet.create({
     marginLeft: 7,
     marginBottom: 2,
   },
+  sheetButon: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 15,
+  }
 });
 
 export default NewStore;

@@ -71,7 +71,11 @@ export const uploadFile = async (data: any, token: string | null) => {
       body: data,
     });
     const response = await req.json();
-    return response;
+    return {
+      code: req.status,
+      message: response?.message,
+      path: response?.path,
+    };
   } catch (error: any) {
     throw new Error(error);
   }
@@ -296,67 +300,10 @@ export const getCoworkers = async (teamId: string, token: string | null) => {
   }
 };
 
-// export const getDistanceMatrix = async (origin: any, destination: any) => {
-//   try {
-//     const req = await fetch(
-//       "https://routes.googleapis.com/directions/v2:computeRoutes",
-//       {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//           "X-Goog-Api-Key": process.env.EXPO_PUBLIC_MAPS_API!,
-//           "X-Goog-FieldMask": "routes.duration,routes.distanceMeters",
-//         },
-//         body: JSON.stringify({
-//           origin,
-//           destination,
-//           travelMode: "DRIVE",
-//           routingPreference: "TRAFFIC_AWARE",
-//           computeAlternativeRoutes: false,
-//           routeModifiers: {
-//             avoidTolls: false,
-//             avoidHighways: false,
-//             avoidFerries: false,
-//           },
-//           languageCode: "en-US",
-//           units: "IMPERIAL",
-//         }),
-//       },
-//     );
-//     const response = await req.json();
-//     console.log(response);
-//     return response;
-//   } catch (error: any) {
-//     throw new Error(error);
-//   }
-// };
-
 export const getDistanceMatrix = async (origin: any, dest: any) => {
   try {
     const req = await fetch(
       `https://maps.googleapis.com/maps/api/distancematrix/json?mode=driving&destinations=${dest.lat},${dest.long}&origins=${origin.lat},${origin.long}&key=${process.env.EXPO_PUBLIC_MAPS_API}`,
-      // {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     "X-Goog-Api-Key": process.env.EXPO_PUBLIC_MAPS_API!,
-      //     "X-Goog-FieldMask": "routes.duration,routes.distanceMeters",
-      //   },
-      //   body: JSON.stringify({
-      //     origin,
-      //     destination,
-      //     travelMode: "DRIVE",
-      //     routingPreference: "TRAFFIC_AWARE",
-      //     computeAlternativeRoutes: false,
-      //     routeModifiers: {
-      //       avoidTolls: false,
-      //       avoidHighways: false,
-      //       avoidFerries: false,
-      //     },
-      //     languageCode: "en-US",
-      //     units: "IMPERIAL",
-      //   }),
-      // },
     );
     const response = await req.json();
     return response;

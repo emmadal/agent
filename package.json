@@ -12,7 +12,9 @@
     "dev:android": "eas build --platform android --profile development-simulator",
     "apk": "npx eas build -p android --profile preview",
     "submit:playstore": "npx eas build --platform android --auto-submit",
-    "update:apk": "npx eas update --channel preview --message 'Update to latest build'"
+    "update:apk": "npx eas update --channel preview --message 'Update to latest build'",
+    "prepare-eas-build": "node ./scripts/prepare-firebase-config.js",
+    "prebuild": "npm run prepare-eas-build"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
@@ -62,7 +64,8 @@
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "zod": "^3.25.17",
-    "zustand": "^5.0.5"
+    "zustand": "^5.0.5",
+    "expo-build-properties": "~0.14.6"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
