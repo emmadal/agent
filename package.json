@@ -84,7 +84,8 @@
           "@hookform/resolvers",
           "react-native-paper-select",
           "geolib",
-          "zod"
+          "zod",
+          "react-native-confetti-cannon"
         ]
       }
     }
