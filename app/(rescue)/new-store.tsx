@@ -33,6 +33,7 @@ import CustomGooglePlacesInput from "@/components/GooglePlace";
 import { BackHandler } from "@/components/BackHandler";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import Icon from "@expo/vector-icons/Feather";
+import Confetti from "@/components/Confetti";
 
 type Inputs = z.infer<typeof storeSchema>;
 const PHOTO_MAX_SIZE = 10 * 1024 * 1024; // 10mb
@@ -40,6 +41,7 @@ const PHOTO_MAX_SIZE = 10 * 1024 * 1024; // 10mb
 const NewStore = () => {
   const token = useToken();
   const sheetRef = useRef<BottomSheet>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
   const { error, list, selectedList, value } = useCommunes();
   const {
     error: errorQuartier,
@@ -124,7 +126,7 @@ const NewStore = () => {
       await processFile(media?.assets?.[0]);
     }
     return;
-  };  
+  };
 
   // upload file
   const processFile = async (image: ImagePicker.ImagePickerAsset) => {
@@ -161,6 +163,16 @@ const NewStore = () => {
     }
   };
 
+  // To start continuous animation:
+  const startCelebration = () => {
+    setShowConfetti(true);
+  };
+
+  // To stop animation:
+  const stopCelebration = () => {
+    setShowConfetti(false);
+  };
+
   const returnData = (input: Inputs) => {
     if (!input.zone_id) {
       delete input?.zone_id;
@@ -191,6 +203,7 @@ const NewStore = () => {
         });
         return;
       }
+      startCelebration();
       Alert.alert(
         "Nouvelle boutique 🎉",
         "Vous avez ajouté la boutique avec succès",
@@ -216,6 +229,7 @@ const NewStore = () => {
                 ...town,
                 value: "",
               });
+              stopCelebration();
             },
           },
         ],
@@ -235,7 +249,11 @@ const NewStore = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <Confetti
+      trigger={showConfetti}
+      origin={{ x: 0, y: 0 }}
+      style={styles.container}
+    >
       <BackHandler title="Ajouter une nouvelle boutique" />
       <ScrollView
         style={styles.Scrollcontainer}
@@ -594,29 +612,34 @@ const NewStore = () => {
       >
         <BottomSheetView
           style={{
-            flex: 1,
             justifyContent: "center",
             alignItems: "center",
             gap: 25,
           }}
         >
           <TouchableOpacity onPress={launchCamera} style={styles.sheetButon}>
-            <ThemedText type="subtitle">Prendre une photo</ThemedText>
+            <ThemedText type="subtitle" style={{ color: "black" }}>
+              Prendre une photo
+            </ThemedText>
             <Icon name="camera" size={25} color="red" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={launchImageLibrary} style={styles.sheetButon}>
-            <ThemedText type="subtitle">Choisir une photo</ThemedText>
+          <TouchableOpacity
+            onPress={launchImageLibrary}
+            style={styles.sheetButon}
+          >
+            <ThemedText type="subtitle" style={{ color: "black" }}>
+              Choisir une photo
+            </ThemedText>
             <Icon name="image" size={25} color="green" />
           </TouchableOpacity>
         </BottomSheetView>
       </BottomSheet>
-    </View>
+    </Confetti>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     paddingTop: 60,
   },
   Scrollcontainer: {
