@@ -10,12 +10,12 @@ const usePosition = () => {
       try {
         const permission = await Location.requestForegroundPermissionsAsync();
         if (!permission.granted) {
-          await Location.requestBackgroundPermissionsAsync();
+          await Location.requestForegroundPermissionsAsync();
         }
 
         let location = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.BestForNavigation,
-          distanceInterval: 100,
+          distanceInterval: 10,
           timeInterval: 500,
         });
         setLocation(location.coords);

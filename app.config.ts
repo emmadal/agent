@@ -22,12 +22,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     permissions: [
       "android.permission.INTERNET",
       "android.permission.ACCESS_FINE_LOCATION",
-      "android.permission.ACCESS_COARSE_LOCATION",
       "android.permission.CAMERA",
-      "android.permission.CAMERA_ROLL",
-      "android.permission.READ_MEDIA_IMAGES",
-      "android.permission.READ_EXTERNAL_STORAGE",
-      "android.permission.WRITE_EXTERNAL_STORAGE",
+      "android.permission.READ_MEDIA_IMAGES", // Android 13+
       "android.permission.FOREGROUND_SERVICE",
       "android.permission.FOREGROUND_SERVICE_LOCATION",
     ],
