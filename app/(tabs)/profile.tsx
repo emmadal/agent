@@ -75,7 +75,7 @@ const Profile = () => {
       await ImagePicker.requestMediaLibraryPermissionsAsync();
     }
     const media = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: "images",
       allowsEditing: true,
       selectionLimit: 1,
       aspect: [4, 3],
