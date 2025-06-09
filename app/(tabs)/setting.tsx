@@ -4,6 +4,7 @@ import {
   ScrollView,
   Pressable,
   useColorScheme,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -15,6 +16,8 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Colors } from "@/constants/Colors";
 import useToken from "@/hooks/useToken";
 import { useQueryClient } from "@tanstack/react-query";
+import Constants from "expo-constants";
+import * as Updates from "expo-updates";
 
 export default function Settings() {
   useToken();
@@ -30,6 +33,62 @@ export default function Settings() {
       SecureStore.deleteItemAsync("agent_str"),
     ]);
   };
+
+    // Check for updates
+    const onFetchUpdateAsync = async () => {
+      try {
+        const update = await Updates.checkForUpdateAsync();
+        if (update.isAvailable) {
+          Alert.alert(
+            "Mise a jour",
+            "Une mise à jour est disponible",
+            [
+              {
+                text: "Annuler",
+                style: "destructive",
+              },
+              {
+                text: "Mettre à jour",
+                style: "default",
+                onPress: async () => {
+                  try {
+                    await Updates.fetchUpdateAsync();
+                    await Updates.reloadAsync();
+                  } catch (error) {
+                    Alert.alert(
+                      "Mise à jour",
+                      "Une erreur est survenue lors de la vérification de la mise à jour",
+                      [
+                        {
+                          text: "OK",
+                          style: "default",
+                        },
+                      ],
+                      { cancelable: false },
+                    );
+                  }
+                },
+              },
+            ],
+            { cancelable: false },
+          );
+          return
+        }
+        Alert.alert("Vous avez la version la plus récente")
+      } catch (error) {
+        Alert.alert(
+          "Mise à jour",
+          "Une erreur est survenue lors de la vérification de la mise à jour",
+          [
+            {
+              text: "OK",
+              style: "default",
+            },
+          ],
+          { cancelable: false },
+        );
+      }
+    };
 
   return (
     <ScrollView
@@ -65,15 +124,6 @@ export default function Settings() {
           <ThemedText type="default">Modifier mot de passe</ThemedText>
         </Pressable>
         <Divider />
-        {/* <Pressable style={styles.pressable}>
-          <Ionicons
-            name="sparkles-sharp"
-            size={20}
-            color={Colors[colorScheme ?? "light"]?.text}
-          />
-          <ThemedText type="default">Signalez un problème</ThemedText>
-        </Pressable>
-        <Divider /> */}
         <Pressable
           style={styles.pressable}
           onPress={() => router.navigate("/terms")}
@@ -98,6 +148,15 @@ export default function Settings() {
           <ThemedText type="default">Support</ThemedText>
         </Pressable>
         <Divider />
+        <Pressable style={styles.pressable} onPress={onFetchUpdateAsync}>
+          <Ionicons
+            name="arrow-undo-circle"
+            size={20}
+            color={Colors[colorScheme ?? "light"]?.text}
+          />
+          <ThemedText type="default">Mise à jour</ThemedText>
+        </Pressable>
+        <Divider />
         <Pressable style={styles.pressable} onPress={logOut}>
           <Ionicons
             name="power"
@@ -107,6 +166,9 @@ export default function Settings() {
           <ThemedText type="default">Déconnexion</ThemedText>
         </Pressable>
       </ThemedView>
+      <ThemedText type="default" style={styles.version}>
+        Version {Constants.expoConfig?.version}
+      </ThemedText>
     </ScrollView>
   );
 }
@@ -156,5 +218,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 5,
     marginVertical: 15,
+  },
+  version: {
+    textAlign: "center",
+    marginTop: 15,
   },
 });
