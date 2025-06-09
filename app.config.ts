@@ -4,7 +4,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Agent Tracker",
   slug: "agent-tracker",
-  version: "1.0.0",
+  version: "1.1.0",
   owner: "emmadal",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
@@ -24,8 +24,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "android.permission.ACCESS_FINE_LOCATION",
       "android.permission.CAMERA",
       "android.permission.READ_MEDIA_IMAGES", // Android 13+
-      "android.permission.FOREGROUND_SERVICE",
-      "android.permission.FOREGROUND_SERVICE_LOCATION",
     ],
     package: "com.agent.tracker",
     config: {
@@ -76,12 +74,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "expo-location",
       {
-        locationAlwaysAndWhenInUsePermission:
-          "Autoriser $(PRODUCT_NAME) à utiliser votre position",
-        isAndroidBackgroundLocationEnabled: true,
         locationWhenInUsePermission:
           "Autoriser $(PRODUCT_NAME) à utiliser votre position",
-        isAndroidForegroundServiceEnabled: true,
       },
     ],
     [
