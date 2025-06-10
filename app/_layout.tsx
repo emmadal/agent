@@ -11,9 +11,8 @@ import { useFonts } from "expo-font";
 import { router, Stack } from "expo-router";
 import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
 import * as SplashScreen from "expo-splash-screen";
-import { Alert, AppState, Platform, StatusBar } from "react-native";
+import { AppState, Platform, StatusBar } from "react-native";
 import "react-native-reanimated";
-import * as Updates from "expo-updates";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   QueryClient,
@@ -61,51 +60,6 @@ export default function RootLayout() {
     });
   });
 
-  // Check for updates
-  const onFetchUpdateAsync = async () => {
-    try {
-      const update = await Updates.checkForUpdateAsync();
-      if (update.isAvailable) {
-        Alert.alert(
-          "Mise a jour",
-          "Une mise à jour est disponible",
-          [
-            {
-              text: "Annuler",
-              style: "destructive",
-            },
-            {
-              text: "Mettre à jour",
-              style: "default",
-              onPress: async () => {
-                try {
-                  await Updates.fetchUpdateAsync();
-                  await Updates.reloadAsync();
-                } catch (error) {
-                  console.error("Error updating:", error);
-                }
-              },
-            },
-          ],
-          { cancelable: false },
-        );
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert(
-        "Mise à jour",
-        "Une erreur est survenue lors de la vérification de la mise à jour",
-        [
-          {
-            text: "OK",
-            style: "default",
-          },
-        ],
-        { cancelable: false },
-      );
-    }
-  };
-
   useEffect(() => {
     const bootstrapAsync = async () => {
       if (loaded) {
@@ -123,10 +77,6 @@ export default function RootLayout() {
     };
     bootstrapAsync();
   }, [loaded]);
-
-  useEffect(() => {
-    onFetchUpdateAsync();
-  }, []);
 
   if (!loaded) {
     return null;

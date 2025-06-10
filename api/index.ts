@@ -71,11 +71,7 @@ export const uploadFile = async (data: any, token: string | null) => {
       body: data,
     });
     const response = await req.json();
-    return {
-      code: req.status,
-      message: response?.message,
-      path: response?.path,
-    };
+    return response?.data;
   } catch (error: any) {
     throw new Error(error);
   }

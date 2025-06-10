@@ -11,7 +11,6 @@ import {
   Image,
   useColorScheme,
   Pressable,
-  View,
 } from "react-native";
 import { PaperSelect } from "react-native-paper-select";
 import { useTheme } from "react-native-paper";
@@ -36,7 +35,7 @@ import Icon from "@expo/vector-icons/Feather";
 import Confetti from "@/components/Confetti";
 
 type Inputs = z.infer<typeof storeSchema>;
-const PHOTO_MAX_SIZE = 10 * 1024 * 1024; // 10mb
+const PHOTO_MAX_SIZE = 100 * 1024 * 1024; // 100mb
 
 const NewStore = () => {
   const token = useToken();
@@ -149,14 +148,14 @@ const NewStore = () => {
 
       // send data file to the server
       const response = await uploadFile(formData, token || store?.token);
-      if (response?.code !== 201) {
+      if (!response?.url) {
         setError("root", {
           message: "Impossible de télécharger la photo",
         });
         setLoading(false);
         return;
       }
-      setValue("picture", response?.path);
+      setValue("picture", response?.url);
       setLoading(false);
       trigger("picture");
       return;
@@ -468,6 +467,7 @@ const NewStore = () => {
                 value={value}
                 onBlur={onBlur}
                 onChangeText={onChange}
+                keyboardType="phone-pad"
                 label="Entrez le contact de la boutique*"
               />
             )}

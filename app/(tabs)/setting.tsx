@@ -5,9 +5,11 @@ import {
   Pressable,
   useColorScheme,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import { useState } from "react";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Avatar, Divider } from "react-native-paper";
@@ -16,7 +18,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Colors } from "@/constants/Colors";
 import useToken from "@/hooks/useToken";
 import { useQueryClient } from "@tanstack/react-query";
-import Constants from "expo-constants";
 import * as Updates from "expo-updates";
 
 export default function Settings() {
@@ -24,6 +25,8 @@ export default function Settings() {
   const store = useStoreApp((state) => state);
   const colorScheme = useColorScheme();
   const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("");
 
   const logOut = async () => {
     store.signOut();
@@ -37,67 +40,116 @@ export default function Settings() {
     // Check for updates
     const onFetchUpdateAsync = async () => {
       try {
+        // Show loading indicator
+        setIsLoading(true);
+        
+        // Check for updates
         const update = await Updates.checkForUpdateAsync();
+        
+        // Hide loading indicator
+        setIsLoading(false);
+        
         if (update.isAvailable) {
+          // Update is available
           Alert.alert(
-            "Mise a jour",
-            "Une mise à jour est disponible",
+            "Mise à jour",
+            "Une nouvelle version de l'application est disponible. Voulez-vous la télécharger maintenant ?",
             [
               {
-                text: "Annuler",
-                style: "destructive",
+                text: "Plus tard",
+                style: "cancel",
               },
               {
                 text: "Mettre à jour",
                 style: "default",
                 onPress: async () => {
                   try {
+                    // Show loading indicator during update
+                    setIsLoading(true);
+                    setLoadingText("Téléchargement de la mise à jour...");
+                    
+                    // Fetch and reload with the update
                     await Updates.fetchUpdateAsync();
-                    await Updates.reloadAsync();
-                  } catch (error) {
+                    
+                    // Notify user before reloading
                     Alert.alert(
                       "Mise à jour",
-                      "Une erreur est survenue lors de la vérification de la mise à jour",
-                      [
-                        {
-                          text: "OK",
-                          style: "default",
-                        },
-                      ],
-                      { cancelable: false },
+                      "Mise à jour téléchargée avec succès. L'application va redémarrer.",
+                      [{ text: "OK", onPress: () => Updates.reloadAsync() }],
+                      { cancelable: false }
+                    );
+                  } catch (error) {
+                    // Hide loading indicator
+                    setIsLoading(false);
+                    setLoadingText("");
+                    
+                    // Show specific error message
+                    const errorMessage = error instanceof Error ? 
+                      error.message : 
+                      "Une erreur inattendue est survenue";
+                      
+                    Alert.alert(
+                      "Échec de la mise à jour",
+                      `Impossible de télécharger la mise à jour: ${errorMessage}`,
+                      [{ text: "OK", style: "default" }],
+                      { cancelable: false }
                     );
                   }
                 },
               },
             ],
-            { cancelable: false },
+            { cancelable: false }
           );
-          return
+          return;
         }
-        Alert.alert("Vous avez la version la plus récente")
-      } catch (error) {
+        
+        // No update available
         Alert.alert(
           "Mise à jour",
-          "Une erreur est survenue lors de la vérification de la mise à jour",
-          [
-            {
-              text: "OK",
-              style: "default",
-            },
-          ],
-          { cancelable: false },
+          "Vous utilisez déjà la version la plus récente de l'application.",
+          [{ text: "OK", style: "default" }],
+          { cancelable: false }
+        );
+      } catch (error) {
+        // Hide loading indicator
+        setIsLoading(false);
+        setLoadingText("");
+        
+        // Show specific error based on the error type
+        let errorMessage = "Une erreur est survenue lors de la vérification de la mise à jour";
+        
+        // Check for network errors
+        if (error instanceof Error) {
+          if (error.message.includes("network") || error.message.includes("internet")) {
+            errorMessage = "Impossible de vérifier les mises à jour. Veuillez vérifier votre connexion Internet.";
+          } else {
+            errorMessage = `Erreur: ${error.message}`;
+          }
+        }
+        
+        Alert.alert(
+          "Échec de la vérification",
+          errorMessage,
+          [{ text: "OK", style: "default" }],
+          { cancelable: false }
         );
       }
     };
 
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      contentInsetAdjustmentBehavior="automatic"
-      keyboardShouldPersistTaps="always"
-      contentContainerStyle={styles.ContainerStyle}
-    >
+    <>
+      {isLoading && (
+        <ThemedView style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={Colors[colorScheme ?? "light"]?.tint} />
+          {loadingText ? <ThemedText style={styles.loadingText}>{loadingText}</ThemedText> : null}
+        </ThemedView>
+      )}
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.ContainerStyle}
+      >
       <ThemedView style={styles.nameContainer}>
         {store?.user?.picture ? (
           <Avatar.Image size={35} source={{ uri: store?.user?.picture }} />
@@ -150,7 +202,7 @@ export default function Settings() {
         <Divider />
         <Pressable style={styles.pressable} onPress={onFetchUpdateAsync}>
           <Ionicons
-            name="arrow-undo-circle"
+            name="reload"
             size={20}
             color={Colors[colorScheme ?? "light"]?.text}
           />
@@ -166,10 +218,8 @@ export default function Settings() {
           <ThemedText type="default">Déconnexion</ThemedText>
         </Pressable>
       </ThemedView>
-      <ThemedText type="default" style={styles.version}>
-        Version {Constants.expoConfig?.version}
-      </ThemedText>
     </ScrollView>
+    </>
   );
 }
 
@@ -182,6 +232,22 @@ const styles = StyleSheet.create({
       android: 70,
       ios: 40,
     }),
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  loadingText: {
+    marginTop: 10,
+    textAlign: "center",
+    fontSize: 16,
   },
   title: {
     fontWeight: "700",
