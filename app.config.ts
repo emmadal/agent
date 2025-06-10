@@ -8,7 +8,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   owner: "emmadal",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
-  scheme: "agenttracker",
+  scheme: "agent",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   description:
