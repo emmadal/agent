@@ -5,12 +5,10 @@ export const loginSchema = z
   .object({
     registration_number: z
       .string({ required_error: "Champ obligatoire" })
-      .min(3, "min 3 caractères")
-      .trim(),
+      .min(3, "min 3 caractères"),
     password: z
       .string({ required_error: "Champ obligatoire" })
-      .min(8, "8 caractères minimum")
-      .trim(),
+      .min(8, "8 caractères minimum"),
   })
   .required();
 
