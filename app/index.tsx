@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, useColorScheme, BackHandler } from "react-native";
+import {
+  StyleSheet,
+  useColorScheme,
+  BackHandler,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Keyboard,
+  Platform,
+} from "react-native";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
 import Logo from "@/components/Logo";
@@ -27,7 +35,6 @@ const Login = () => {
   const {
     control,
     handleSubmit,
-    reset,
     setError,
     formState: { errors, isLoading, isSubmitting },
   } = useForm<Inputs>({
@@ -57,7 +64,6 @@ const Login = () => {
         await SecureStore.deleteItemAsync("credentials");
         return;
       }
-      reset();
       updateState({
         user: data?.data?.user,
         team: data?.data?.teams[0],
@@ -97,118 +103,129 @@ const Login = () => {
   }, []);
 
   return (
-    <ThemedView style={styles.container}>
-      <Logo style={styles.logo} />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.keyboard}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ThemedView style={styles.container}>
+          <Logo style={styles.logo} />
 
-      <ThemedView style={styles.viewHeadline}>
-        <ThemedText type="defaultSemiBold"> Démarrez avec </ThemedText>
-        <ThemedText type="subtitle" style={styles.desc}>
-          Agent Tracker
-        </ThemedText>
-      </ThemedView>
+          <ThemedView style={styles.viewHeadline}>
+            <ThemedText type="defaultSemiBold"> Démarrez avec </ThemedText>
+            <ThemedText type="subtitle" style={styles.desc}>
+              Agent Tracker
+            </ThemedText>
+          </ThemedView>
 
-      <ThemedView style={styles.subView}>
-        <ThemedText type="subtitle">Connectez vous</ThemedText>
-        <ThemedText type="default">Bienvenue, vous nous avez manqué</ThemedText>
-      </ThemedView>
+          <ThemedView style={styles.subView}>
+            <ThemedText type="subtitle">Connectez vous</ThemedText>
+            <ThemedText type="default">
+              Bienvenue, vous nous avez manqué
+            </ThemedText>
+          </ThemedView>
 
-      <ThemedView>
-        <Controller
-          name="registration_number"
-          control={control}
-          rules={{ required: true }}
-          render={({ field: { onBlur, onChange, value } }) => (
-            <TextInput
-              value={value?.trim()}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              keyboardType="default"
-              mode="flat"
-              inputMode="text"
-              textColor={Colors[colorScheme ?? "light"].text}
-              label="Numéro identifiant*"
-              style={styles.textInput}
-              underlineColorAndroid="transparent"
-              autoCapitalize="none"
-              selectionColor={Colors.primaryColor}
-              theme={{
-                colors: {
-                  primary: Colors.primaryColor,
-                },
-              }}
-            />
-          )}
-        />
-        <ThemedText type="default" style={styles.error}>
-          {errors.registration_number?.message}
-        </ThemedText>
-      </ThemedView>
-
-      <ThemedView>
-        <Controller
-          name="password"
-          control={control}
-          rules={{ required: true, maxLength: 10, max: 10 }}
-          render={({ field: { onBlur, onChange, value } }) => (
-            <TextInput
-              value={value?.trim()}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              secureTextEntry={hide}
-              mode="flat"
-              textColor={Colors[colorScheme ?? "light"].text}
-              inputMode="text"
-              label="Mot de passe*"
-              style={styles.textInput}
-              underlineColorAndroid="transparent"
-              autoCapitalize="none"
-              selectionColor={Colors.primaryColor}
-              left={
-                <TextInput.Icon
-                  icon="lock-outline"
-                  color={Colors[colorScheme ?? "light"]?.text}
-                  style={{ marginBottom: -10 }}
+          <ThemedView>
+            <Controller
+              name="registration_number"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onBlur, onChange, value } }) => (
+                <TextInput
+                  value={value?.trim()}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  keyboardType="default"
+                  mode="flat"
+                  inputMode="text"
+                  textColor={Colors[colorScheme ?? "light"].text}
+                  label="Numéro identifiant*"
+                  style={styles.textInput}
+                  underlineColorAndroid="transparent"
+                  autoCapitalize="none"
+                  selectionColor={Colors.primaryColor}
+                  theme={{
+                    colors: {
+                      primary: Colors.primaryColor,
+                    },
+                  }}
                 />
-              }
-              right={
-                <TextInput.Icon
-                  icon={hide ? "eye-off-outline" : "eye-outline"}
-                  onPress={() => setHide(!hide)}
-                  color={Colors[colorScheme ?? "light"]?.text}
-                  style={{ marginBottom: -10 }}
-                />
-              }
-              theme={{
-                colors: {
-                  primary: Colors.primaryColor,
-                },
-              }}
+              )}
             />
-          )}
-        />
-        <ThemedText type="default" style={styles.error}>
-          {errors.password?.message}
-        </ThemedText>
-      </ThemedView>
+            <ThemedText type="default" style={styles.error}>
+              {errors.registration_number?.message}
+            </ThemedText>
+          </ThemedView>
 
-      <Button
-        title="Se connecter"
-        style={styles.button}
-        loading={mutation.isPending || isSubmitting || isLoading}
-        disabled={mutation.isPending || isSubmitting || isLoading}
-        onPress={handleSubmit(handleForm)}
-      />
-      {(mutation.isError && mutation?.error) || errors.root?.message ? (
-        <ThemedText type="default" style={styles.errorlogin}>
-          {mutation.error?.message || errors?.root?.message}
-        </ThemedText>
-      ) : null}
-    </ThemedView>
+          <ThemedView>
+            <Controller
+              name="password"
+              control={control}
+              rules={{ required: true, maxLength: 10, max: 10 }}
+              render={({ field: { onBlur, onChange, value } }) => (
+                <TextInput
+                  value={value?.trim()}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  secureTextEntry={hide}
+                  mode="flat"
+                  textColor={Colors[colorScheme ?? "light"].text}
+                  inputMode="text"
+                  label="Mot de passe*"
+                  style={styles.textInput}
+                  underlineColorAndroid="transparent"
+                  autoCapitalize="none"
+                  selectionColor={Colors.primaryColor}
+                  left={
+                    <TextInput.Icon
+                      icon="lock-outline"
+                      color={Colors[colorScheme ?? "light"]?.text}
+                      style={{ marginBottom: -10 }}
+                    />
+                  }
+                  right={
+                    <TextInput.Icon
+                      icon={hide ? "eye-off-outline" : "eye-outline"}
+                      onPress={() => setHide(!hide)}
+                      color={Colors[colorScheme ?? "light"]?.text}
+                      style={{ marginBottom: -10 }}
+                    />
+                  }
+                  theme={{
+                    colors: {
+                      primary: Colors.primaryColor,
+                    },
+                  }}
+                />
+              )}
+            />
+            <ThemedText type="default" style={styles.error}>
+              {errors.password?.message}
+            </ThemedText>
+          </ThemedView>
+
+          <Button
+            title="Se connecter"
+            style={styles.button}
+            loading={mutation.isPending || isSubmitting || isLoading}
+            disabled={mutation.isPending || isSubmitting || isLoading}
+            onPress={handleSubmit(handleForm)}
+          />
+          {(mutation.isError && mutation?.error) || errors.root?.message ? (
+            <ThemedText type="default" style={styles.errorlogin}>
+              {mutation.error?.message || errors?.root?.message}
+            </ThemedText>
+          ) : null}
+        </ThemedView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  keyboard: { flex: 1 },
+  keyboard: {
+    flex: 1,
+  },
   textInput: {
     textAlign: "auto",
     backgroundColor: "transparent",
