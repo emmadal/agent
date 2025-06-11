@@ -315,7 +315,7 @@ export const uploadCldFile = async (data: any, cloudName: string) => {
       method: "POST",
       headers: {
         "Content-Type": "multipart/form-data",
-        Authorization: `${process.env.EXPO_PUBLIC_CLOUD_SECRET}`,
+        Authorization: `${process.env.EXPO_PUBLIC_CLOUD_API_SECRET}`,
       },
       body: data,
     },

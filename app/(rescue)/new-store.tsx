@@ -19,7 +19,7 @@ import { storeSchema } from "@/lib/schema";
 import { useStoreApp } from "@/store";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { addStore, uploadFile } from "@/api";
+import { addStore, uploadCldFile } from "@/api";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { ThemedText } from "@/components/ThemedText";
@@ -129,6 +129,7 @@ const NewStore = () => {
 
   // upload file
   const processFile = async (image: ImagePicker.ImagePickerAsset) => {
+    const cldName = process.env.EXPO_PUBLIC_CLOUD_NAME as string;
     let formData: FormData = new FormData();
     if (image?.fileSize! > PHOTO_MAX_SIZE) {
       Alert.alert(
@@ -140,22 +141,27 @@ const NewStore = () => {
 
     if (image?.uri) {
       setLoading(!loading);
-      formData.append("picture", {
-        name: image?.fileName!,
-        uri: image?.uri!,
-        type: image?.mimeType!,
+      formData.append(
+        "upload_preset",
+        `${process.env.EXPO_PUBLIC_UPLOAD_PRESET}`,
+      );
+      formData.append("api_key", `${process.env.EXPO_PUBLIC_CLOUD_API_KEY}`);
+      formData.append("file", {
+        uri: image.uri,
+        name: image.fileName,
+        type: image.mimeType,
       } as any);
 
       // send data file to the server
-      const response = await uploadFile(formData, token || store?.token);
-      if (!response?.url) {
+      const response = await uploadCldFile(formData, cldName);
+      if (response?.code !== 200) {
         setError("root", {
           message: "Impossible de télécharger la photo",
         });
         setLoading(false);
         return;
       }
-      setValue("picture", response?.url);
+      setValue("picture", response?.file);
       setLoading(false);
       trigger("picture");
       return;
