@@ -1,68 +1,149 @@
 import React from "react";
-import { Dimensions, StyleSheet } from "react-native";
+import { Dimensions, StyleSheet, View } from "react-native";
 import { Button, Card } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { Agency } from "@/types/agency.type";
 import { ThemedText } from "./ThemedText";
 import { Colors } from "@/constants/Colors";
 import { router } from "expo-router";
+import { type LegendListRenderItemProps } from "@legendapp/list";
+import { LinearGradient } from "expo-linear-gradient";
+import { Image } from "expo-image";
 
-const RoadAgencyCard = ({ agency }: { agency: Agency }) => {
+
+const RoadAgencyCard: React.FC<LegendListRenderItemProps<Agency>> = ({ item }) => {
   return (
     <Card style={styles.card}>
-      <Card.Content style={styles.content}>
-        <ThemedText type="bold" style={styles.text}>
-          {agency.name?.toLocaleUpperCase()}
-        </ThemedText>
-        <ThemedText type="default" style={styles.text}>
-          {agency.address}
-        </ThemedText>
-      </Card.Content>
-      <Card.Actions style={styles.content}>
-        <Button
-          textColor={Colors?.dark?.text}
-          mode="contained"
-          buttonColor={Colors?.primaryColor}
-          onPress={() =>
-            router.navigate({
-              pathname: "/road-agency",
-              params: { store: JSON.stringify(agency) },
-            })
-          }
-          style={{ marginTop: 18 }}
-        >
-          Consultez
-        </Button>
-      </Card.Actions>
+      <LinearGradient
+        colors={[Colors.light.background, Colors.light.background]}
+        style={styles.gradient}
+      >
+        <Card.Content style={styles.content}>
+          <View style={styles.headerContainer}>
+            <Image
+              source={{ uri: item?.picture }}
+              style={styles.avatar}
+              contentFit="cover"
+              transition={1000}
+              cachePolicy="disk"
+              placeholder={require("@/assets/images/placeholder.png")}
+            />
+            <View style={styles.headerTextContainer}>
+              <ThemedText type="bold" style={styles.titleText}>
+                {item.name?.toLocaleUpperCase()}
+              </ThemedText>
+              <View style={styles.addressContainer}>
+                <MaterialCommunityIcons
+                  name="map-marker"
+                  size={16}
+                  color={Colors?.primaryColor}
+                  style={styles.icon}
+                />
+                <ThemedText type="default" style={styles.addressText}>
+                  {item.address}
+                </ThemedText>
+              </View>
+            </View>
+          </View>
+        </Card.Content>
+        <View style={styles.divider} />
+        <Card.Actions style={styles.actionsContainer}>
+          <Button
+            textColor="white"
+            mode="contained"
+            buttonColor={Colors?.primaryColor}
+            onPress={() =>
+              router.navigate({
+                pathname: "/road-agency",
+                params: { store: JSON.stringify(item) },
+              })
+            }
+            style={styles.button}
+            labelStyle={styles.buttonLabel}
+            icon={({ size, color }) => (
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={size}
+                color={color}
+              />
+            )}
+          >
+            Consultez
+          </Button>
+        </Card.Actions>
+      </LinearGradient>
     </Card>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: 25,
-    width: Dimensions.get("window").width / 1.2,
+    marginVertical: 16,
+    width: Dimensions.get("window").width / 1.1,
     alignSelf: "center",
-    borderRadius: 0,
-    elevation: 10,
-    // backgroundColor: "#fff",
-    minHeight: 150,
+    borderRadius: 12,
+    elevation: 4,
+    overflow: "hidden",
+    backgroundColor: "transparent",
+  },
+  gradient: {
+    width: "100%",
+    height: "100%",
   },
   content: {
-    paddingTop: 5,
+    padding: 16,
   },
-  cover: {
-    resizeMode: "cover",
-    borderRadius: 0,
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
-  text: {
+  headerTextContainer: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  titleText: {
+    fontSize: 16,
     backgroundColor: "transparent",
-    marginTop: 10,
+    marginBottom: 4,
   },
-  activityIndicator: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 50,
+  addressContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 2,
+  },
+  addressText: {
+    fontSize: 14,
+    backgroundColor: "transparent",
+    opacity: 0.8,
+    flex: 1,
+  },
+  icon: {
+    marginRight: 4,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+    overflow: "hidden",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#E0E0E0",
+    marginHorizontal: 16,
+  },
+  actionsContainer: {
+    justifyContent: "flex-end",
+    padding: 16,
+  },
+  button: {
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    elevation: 2,
+  },
+  buttonLabel: {
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
 

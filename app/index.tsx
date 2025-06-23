@@ -14,7 +14,7 @@ import Logo from "@/components/Logo";
 import * as SecureStore from "expo-secure-store";
 import { TextInput } from "react-native-paper";
 import { useForm, Controller } from "react-hook-form";
-import z from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@/lib/schema";
 import { login } from "@/api";

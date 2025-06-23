@@ -51,50 +51,64 @@ const Home = memo(() => {
 
   return (
     <ThemedView style={styles.container}>
-      {Platform.OS === "android" ? <GoogleMaps.View
-        style={{ flex: 1 }}
-        cameraPosition={{
-          coordinates: {
-            latitude: position?.latitude!,
-            longitude: position?.longitude!,
-          },
-          zoom: 18,
-        }}
-        markers={data?.map((store) => ({
-          title: store.name,
-          coordinates: {
-            latitude: store.latitude,
-            longitude: store.longitude,
-          },
-          showCallout: true,
-        }))}
-        properties={{
-          isMyLocationEnabled: true,
-        }}
-        uiSettings={{
-          zoomControlsEnabled: false,
-        }}
-      /> : <AppleMaps.View
-        style={{ flex: 1 }}
-        cameraPosition={{
-          coordinates: {
-            latitude: position?.latitude!,
-            longitude: position?.longitude!,
-          },
-          zoom: 18,
-        }}
-        markers={data?.map((store) => ({
-          title: store.name,
-          coordinates: {
-            latitude: store.latitude,
-            longitude: store.longitude,
-          },
-          showCallout: true,
-        }))}
-        properties={{
-          selectionEnabled: true,
-        }}
-      />}
+      {Platform.OS === "android" ? (
+        <GoogleMaps.View
+          style={{ flex: 1 }}
+          cameraPosition={{
+            coordinates: {
+              latitude: position?.latitude!,
+              longitude: position?.longitude!,
+            },
+            zoom: 18,
+          }}
+          markers={
+            data?.length <= 1000
+              ? data?.map((store) => ({
+                  title: store.name,
+                  coordinates: {
+                    latitude: store.latitude,
+                    longitude: store.longitude,
+                  },
+                  showCallout: true,
+                }))
+              : []
+          }
+          properties={{
+            isMyLocationEnabled: true,
+          }}
+          uiSettings={{
+            zoomControlsEnabled: false,
+            compassEnabled: true,
+            zoomGesturesEnabled: true,
+          }}
+        />
+      ) : (
+        <AppleMaps.View
+          style={{ flex: 1 }}
+          cameraPosition={{
+            coordinates: {
+              latitude: position?.latitude!,
+              longitude: position?.longitude!,
+            },
+            zoom: 18,
+          }}
+          markers={
+            data?.length <= 1000
+              ? data?.map((store) => ({
+                  title: store.name,
+                  coordinates: {
+                    latitude: store.latitude,
+                    longitude: store.longitude,
+                  },
+                  showCallout: true,
+                }))
+              : []
+          }
+          properties={{
+            selectionEnabled: true,
+          }}
+        />
+      )}
       {data?.length ? <ShowAgency agencies={data} /> : null}
       <Button
         loading={loading}

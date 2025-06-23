@@ -1,6 +1,5 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import { Dimensions, StyleSheet } from "react-native";
-import Animated from "react-native-reanimated";
 import RoadAgencyCard from "@/components/RoadAgencyCard";
 import { ThemedView } from "@/components/ThemedView";
 import useToken from "@/hooks/useToken";
@@ -9,11 +8,17 @@ import SuspenseView from "@/components/SuspenseView";
 import { Searchbar } from "react-native-paper";
 import { Colors } from "@/constants/Colors";
 import { BackHandler } from "@/components/BackHandler";
+import {
+  LegendList,
+  LegendListRef,
+} from "@legendapp/list";
+import { ThemedText } from "@/components/ThemedText";
 
 const AgencyList = () => {
   useToken();
   const { data, error, isError, isPending, refetch } = useMarket();
   const [searchQuery, setSearchQuery] = React.useState("");
+  const listRef = useRef<LegendListRef | null>(null);
 
   const filterResult = useMemo(() => {
     let result = data;
@@ -46,15 +51,20 @@ const AgencyList = () => {
         error={error}
         refetch={refetch}
       >
-        <Animated.FlatList
-          refreshing={isPending}
-          onRefresh={refetch}
+        <LegendList
           data={filterResult}
-          keyExtractor={(data) => String(data?.id!)}
-          renderItem={({ item }) => <RoadAgencyCard agency={item} />}
-          showsVerticalScrollIndicator={false}
-          contentInsetAdjustmentBehavior="automatic"
-          contentContainerStyle={styles.ContainerStyle}
+          renderItem={RoadAgencyCard}
+          // Recommended props (Improves performance)
+          keyExtractor={(item) => String(item?.id)}
+          recycleItems={true}
+          // Recommended if data can change
+          maintainVisibleContentPosition
+          ref={listRef}
+          ListEmptyComponent={
+            <ThemedText type="defaultSemiBold" style={styles.emptyText}>
+              Aucune boutique trouvée
+            </ThemedText>
+          }
         />
       </SuspenseView>
     </ThemedView>
@@ -76,9 +86,13 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderColor: "#808080",
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 50,
     width: Dimensions.get("window").width / 1.2,
     alignSelf: "center",
+  },
+  emptyText: {
+    marginTop: 20,
+    textAlign: "center",
   },
 });
 export default AgencyList;
