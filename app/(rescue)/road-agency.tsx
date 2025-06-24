@@ -5,8 +5,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Dimensions,
-  Pressable,
+  TouchableOpacity,
   useColorScheme,
   ActivityIndicator,
   View,
@@ -14,15 +13,15 @@ import {
 import useOneVisitByDate from "@/hooks/useOneVisitByDate";
 import { getPreciseDistance, convertDistance } from "geolib";
 import useToken from "@/hooks/useToken";
-import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useLocalSearchParams, router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import usePosition from "@/hooks/usePosition";
-import Button from "@/components/Button";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { BackHandler } from "@/components/BackHandler";
+import { LinearGradient } from "expo-linear-gradient";
+import { Card } from "react-native-paper";
 
 const RoadAgency = () => {
   const colorScheme = useColorScheme();
@@ -98,7 +97,7 @@ const RoadAgency = () => {
   };
 
   return (
-    <View style={{ flex: 1, marginTop: 60 }}>
+    <View style={styles.container}>
       <BackHandler title={agency?.name} />
       <ScrollView
         style={styles.scroll}
@@ -106,101 +105,160 @@ const RoadAgency = () => {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.contentContainer}
       >
-        <ThemedView style={styles.header}>
-          <ThemedText type="bold">{agency?.name}</ThemedText>
-          <Button
-            title="Appeler le gestionnaire"
-            style={styles.call}
-            onPress={() => handleCall(`tel:${agency?.phone_gerant}`)}
-            icon="phone"
-          />
-        </ThemedView>
-        <ThemedView
-          style={[
-            styles.info,
-            {
-              backgroundColor:
-                colorScheme === "light" ? "white" : "transparent",
-            },
-          ]}
-        >
-          <ThemedView style={styles.viewaddress}>
-            <Icon
-              name="map-marker"
-              size={17}
-              color={Colors[colorScheme ?? "light"].text}
+        <Card style={styles.headerCard}>
+          <LinearGradient
+            colors={[Colors.light.tint, Colors.light.background]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.headerGradient}
+          >
+            <Image
+              source={{ uri: agency?.picture }}
+              accessibilityLabel="logo-agency"
+              aria-label="logo-agency"
+              alt="logo-agency"
+              testID="logo-agency"
+              style={styles.storeImg}
+              onLoadStart={() => setLoading(true)}
+              onLoadEnd={() => setLoading(false)}
             />
-            <ThemedText type="default">{agency?.address}</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.data}>
-            <ThemedView style={styles.row}>
-              <ThemedText type="default">Distance</ThemedText>
-              <ThemedText type="bold">{processDistance()}</ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.row}>
-              <ThemedText type="default">Durée du trajet</ThemedText>
-              <ThemedText type="bold">{route?.duration}</ThemedText>
-            </ThemedView>
-            <Button
-              title="Contacter la boutique"
-              style={[styles.call, { marginTop: 20 }]}
-              onPress={() => handleCall(`tel:${agency?.phone_boutique}`)}
-              icon="phone"
+            
+            <ActivityIndicator
+              style={styles.activityIndicator}
+              color={Colors.primaryColor}
+              animating={loading}
             />
-          </ThemedView>
-        </ThemedView>
-
-        {data && data?.data?.length ? null : (
-          <Pressable style={styles.distance}>
-            <ThemedText
-              lightColor={Colors.primaryColor}
-              darkColor={Colors.primaryColor}
-              type="defaultSemiBold"
-              onPress={openGoogleMaps}
-            >
-              Commencez le trajet
-            </ThemedText>
-          </Pressable>
+            
+            <Card.Content style={styles.headerContent}>
+              <ThemedText type="bold" style={styles.agencyName}>
+                {agency?.name}
+              </ThemedText>
+              <View style={styles.viewaddress}>
+                <MaterialCommunityIcons
+                  name="map-marker"
+                  size={18}
+                  color={Colors[colorScheme ?? "light"].text}
+                />
+                <ThemedText type="default" style={styles.addressText}>
+                  {agency?.address}
+                </ThemedText>
+              </View>
+            </Card.Content>
+          </LinearGradient>
+        </Card>
+        
+        <Card style={styles.infoCard}>
+          <Card.Title title="Informations" titleStyle={styles.cardTitle} />
+          <Card.Content>
+            <View style={styles.infoContainer}>
+              <View style={styles.infoItem}>
+                <MaterialCommunityIcons name="map-marker-distance" size={24} color={Colors.primaryColor} />
+                <View style={styles.infoTextContainer}>
+                  <ThemedText type="default" style={styles.infoLabel}>Distance</ThemedText>
+                  <ThemedText type="bold" style={styles.infoValue}>{processDistance()}</ThemedText>
+                </View>
+              </View>
+            </View>
+          </Card.Content>
+        </Card>
+        
+        <Card style={styles.actionCard}>
+          <Card.Content>
+            <View style={styles.buttonGroup}>
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => handleCall(`tel:${agency?.phone_gerant}`)}
+              >
+                <LinearGradient
+                  colors={[Colors.primaryColor, Colors.primaryColor]}
+                  style={styles.buttonGradient}
+                >
+                  <MaterialCommunityIcons name="phone" size={24} color="white" />
+                  <ThemedText type="defaultSemiBold" style={styles.buttonText}>Appeler le gestionnaire</ThemedText>
+                </LinearGradient>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => handleCall(`tel:${agency?.phone_boutique}`)}
+              >
+                <LinearGradient
+                  colors={[Colors.primaryColor, Colors.primaryColor]}
+                  style={styles.buttonGradient}
+                >
+                  <MaterialCommunityIcons name="store" size={24} color="white" />
+                  <ThemedText type="defaultSemiBold" style={styles.buttonText}>Contacter la boutique</ThemedText>
+                </LinearGradient>
+              </TouchableOpacity>
+              
+              {(!data || !data?.data?.length) && (
+                <TouchableOpacity 
+                  style={styles.actionButton}
+                  onPress={openGoogleMaps}
+                >
+                  <LinearGradient
+                    colors={[Colors.light.tint, Colors.primaryColor]}
+                    style={styles.buttonGradient}
+                  >
+                    <MaterialCommunityIcons name="navigation-variant" size={24} color="white" />
+                    <ThemedText type="defaultSemiBold" style={styles.buttonText}>Voir le trajet</ThemedText>
+                  </LinearGradient>
+                </TouchableOpacity>
+              )}
+            </View>
+          </Card.Content>
+        </Card>
+        
+        {agency?.description && (
+          <Card style={styles.descriptionCard}>
+            <Card.Title title="Description" titleStyle={styles.cardTitle} />
+            <Card.Content>
+              <ThemedText type="default" style={styles.descriptionText}>
+                {agency?.description}
+              </ThemedText>
+            </Card.Content>
+          </Card>
         )}
-        <Image
-          source={{ uri: agency?.picture }}
-          accessibilityLabel="logo-agency"
-          aria-label="logo-agency"
-          alt="logo-agency"
-          testID="logo-agency"
-          style={styles.storeImg}
-          onLoadStart={() => setLoading(true)}
-          onLoadEnd={() => setLoading(false)}
-        />
-        <ActivityIndicator
-          style={styles.activityIndicator}
-          color={Colors.primaryColor}
-          animating={loading}
-        />
 
-        <ThemedText type="default" style={{ marginTop: 10 }}>
-          {agency?.description}
-        </ThemedText>
         {data && data?.data?.length ? (
-          <ThemedText type="defaultSemiBold" style={styles.textVisit}>
-            Vous avez déjà effectuée une visite aujourd&apos;hui.
-          </ThemedText>
+          <Card style={[styles.statusCard, styles.visitComplete]}>
+            <Card.Content style={styles.statusContent}>
+              <MaterialCommunityIcons name="check-circle" size={24} color="green" />
+              <ThemedText type="defaultSemiBold" style={styles.textVisit}>
+                Vous avez déjà effectuée une visite aujourd&apos;hui.
+              </ThemedText>
+            </Card.Content>
+          </Card>
         ) : !route?.distanceMeters || route?.distanceMeters > 100 ? (
-          <ThemedText type="defaultSemiBold" style={styles.errorVisit}>
-            Vous ne pouvez pas effectuer de visite. Veuillez vous rapprochez de
-            la boutique.
-          </ThemedText>
+          <Card style={[styles.statusCard, styles.visitError, { marginBottom: 30 }]}>
+            <Card.Content style={styles.statusContent}>
+              <MaterialCommunityIcons name="alert-circle" size={24} color="red" />
+              <ThemedText type="defaultSemiBold" style={styles.errorVisit}>
+                Vous ne pouvez pas effectuer de visite. Veuillez vous rapprocher de
+                la boutique.
+              </ThemedText>
+            </Card.Content>
+          </Card>
         ) : (
-          <Button
-            style={styles.Viewbtn}
-            title="Commencer la visite"
+          <TouchableOpacity
+            style={styles.startVisitButton}
             onPress={() =>
               router.navigate({
                 pathname: "/visit",
                 params: { store: JSON.stringify(agency) },
               })
             }
-          />
+          >
+            <LinearGradient
+              colors={[Colors.primaryColor, Colors.light.tint]}
+              style={styles.visitButtonGradient}
+            >
+              <MaterialCommunityIcons name="clipboard-check" size={24} color="white" />
+              <ThemedText type="bold" style={styles.visitButtonText}>
+                Commencer la visite
+              </ThemedText>
+            </LinearGradient>
+          </TouchableOpacity>
         )}
       </ScrollView>
     </View>
@@ -211,98 +269,174 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "transparent",
-  },
-  distance: {
-    alignSelf: "center",
-    borderColor: "transparent",
-    borderWidth: 0,
-    marginTop: 20,
-  },
-  header: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginHorizontal: 5,
-    backgroundColor: "transparent",
+    marginTop: 60
   },
   scroll: {
     flex: 1,
-    padding: 20,
+    padding: 16,
     backgroundColor: "transparent",
   },
   contentContainer: {
     flexGrow: 1,
+    paddingBottom: 80,
     backgroundColor: "transparent",
   },
-  row: {
-    backgroundColor: "transparent",
-    marginVertical: 5,
+  headerCard: {
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: "hidden",
+    elevation: 4,
   },
-  Viewbtn: {
-    marginTop: 30,
-    marginBottom: Platform.OS === "android" ? 80 : 45,
+  headerGradient: {
+    width: "100%",
+    paddingTop: 16,
+  },
+  headerContent: {
+    padding: 16,
+  },
+  agencyName: {
+    fontSize: 22,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  storeImg: {
+    height: 200,
+    borderRadius: 12,
+    marginHorizontal: 16,
     alignSelf: "center",
-    borderColor: "transparent",
-    borderWidth: 0,
-  },
-  info: {
-    borderWidth: 1,
-    padding: 10,
-    marginTop: 25,
-    borderColor: "#DDDDE1",
-  },
-  data: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: "transparent",
-    marginLeft: 5,
-    flexWrap: "wrap",
-    marginTop: 5,
-    marginBottom: 10,
-  },
-  textVisit: {
-    color: "green",
-    fontWeight: "600",
-    marginTop: 30,
-    marginBottom: 50,
-  },
-  errorVisit: {
-    color: "red",
-    fontWeight: "600",
-    marginTop: 30,
-    marginBottom: 50,
-  },
-  call: {
-    borderColor: "transparent",
-    alignSelf: "flex-end",
-    width: Dimensions.get("screen").width / 2,
-    marginVertical: 10,
-  },
-  viewaddress: {
-    backgroundColor: "transparent",
-    flexDirection: "row",
-    gap: 5,
-    marginVertical: 10,
-    alignItems: "center",
-    flexWrap: "wrap",
-    alignSelf: "center",
+    width: "90%",
   },
   activityIndicator: {
     position: "absolute",
     left: 0,
     right: 0,
-    top: 50,
-    bottom: 50,
+    top: 100,
   },
-  storeImg: {
-    height: 270,
-    borderRadius: 15,
-    marginBottom: 20,
-    marginTop: 30,
+  viewaddress: {
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  addressText: {
+    marginLeft: 6,
+    fontSize: 14,
+  },
+  infoCard: {
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  cardTitle: {
+    fontSize: 18,
+    color: Colors.primaryColor,
+    fontWeight: "700",
+  },
+  infoContainer: {
+    padding: 8,
+  },
+  infoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  infoTextContainer: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 14,
+    opacity: 0.7,
+  },
+  infoValue: {
+    fontSize: 16,
+  },
+  divider: {
+    height: 1,
+    opacity: 0.2,
+    marginVertical: 8,
+  },
+  actionCard: {
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  buttonGroup: {
+    gap: 12,
+  },
+  actionButton: {
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  buttonGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    borderRadius: 12,
+  },
+  buttonText: {
+    color: "white",
+    marginLeft: 12,
+    fontSize: 16,
+  },
+  descriptionCard: {
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  descriptionText: {
+    lineHeight: 22,
+  },
+  statusCard: {
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  statusContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+  },
+  visitComplete: {
+    borderLeftColor: "green",
+    borderLeftWidth: 4,
+  },
+  visitError: {
+    borderLeftColor: "red",
+    borderLeftWidth: 4,
+  },
+  textVisit: {
+    color: "green",
+    marginLeft: 8,
+    flex: 1,
+  },
+  errorVisit: {
+    color: "red",
+    marginLeft: 8,
+    flex: 1,
+  },
+  startVisitButton: {
+    marginVertical: 16,
+    borderRadius: 16,
+    overflow: "hidden",
     alignSelf: "center",
-    aspectRatio: 1,
+    width: "80%",
   },
+  visitButtonGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    borderRadius: 12,
+  },
+  visitButtonText: {
+    color: "white",
+    fontSize: 18,
+    marginLeft: 8,
+  }
 });
 
 export default RoadAgency;
