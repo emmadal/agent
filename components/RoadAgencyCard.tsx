@@ -1,5 +1,5 @@
 import React from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet, View, useColorScheme } from "react-native";
 import { Button, Card } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { Agency } from "@/types/agency.type";
@@ -12,10 +12,12 @@ import { Image } from "expo-image";
 
 
 const RoadAgencyCard: React.FC<LegendListRenderItemProps<Agency>> = ({ item }) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   return (
     <Card style={styles.card}>
       <LinearGradient
-        colors={[Colors.light.background, Colors.light.background]}
+        colors={[isDark ? Colors.dark.background : Colors.light.background, isDark ? Colors.dark.background : Colors.light.background]}
         style={styles.gradient}
       >
         <Card.Content style={styles.content}>
@@ -36,7 +38,7 @@ const RoadAgencyCard: React.FC<LegendListRenderItemProps<Agency>> = ({ item }) =
                 <MaterialCommunityIcons
                   name="map-marker"
                   size={16}
-                  color={Colors?.primaryColor}
+                  color={Colors.primaryColor}
                   style={styles.icon}
                 />
                 <ThemedText type="default" style={styles.addressText}>
@@ -85,6 +87,10 @@ const styles = StyleSheet.create({
     elevation: 4,
     overflow: "hidden",
     backgroundColor: "transparent",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   gradient: {
     width: "100%",
@@ -103,7 +109,6 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 16,
-    backgroundColor: "transparent",
     marginBottom: 4,
   },
   addressContainer: {
@@ -114,7 +119,6 @@ const styles = StyleSheet.create({
   addressText: {
     fontSize: 14,
     backgroundColor: "transparent",
-    opacity: 0.8,
     flex: 1,
   },
   icon: {
@@ -128,7 +132,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: "rgba(150, 150, 150, 0.3)",
     marginHorizontal: 16,
   },
   actionsContainer: {

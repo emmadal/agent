@@ -4,7 +4,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Agent Tracker",
   slug: "agent-tracker",
-  version: "2.0.0",
+  version: "2.1.0",
   owner: "emmadal",
   orientation: "portrait",
   icon: "./assets/images/icon.png",

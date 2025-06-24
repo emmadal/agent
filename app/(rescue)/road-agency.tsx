@@ -106,12 +106,6 @@ const RoadAgency = () => {
         contentContainerStyle={styles.contentContainer}
       >
         <Card style={styles.headerCard}>
-          <LinearGradient
-            colors={[Colors.light.tint, Colors.light.background]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.headerGradient}
-          >
             <Image
               source={{ uri: agency?.picture }}
               accessibilityLabel="logo-agency"
@@ -144,7 +138,6 @@ const RoadAgency = () => {
                 </ThemedText>
               </View>
             </Card.Content>
-          </LinearGradient>
         </Card>
         
         <Card style={styles.infoCard}>
@@ -305,7 +298,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginHorizontal: 16,
     alignSelf: "center",
-    width: "90%",
+    width: "100%",
   },
   activityIndicator: {
     position: "absolute",
