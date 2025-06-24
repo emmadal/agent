@@ -158,9 +158,36 @@ const RoadAgency = () => {
                   <ThemedText type="bold" style={styles.infoValue}>{processDistance()}</ThemedText>
                 </View>
               </View>
+              
+              {agency?.description && (
+                <View style={styles.descriptionContainer}>
+                  <View style={styles.descriptionHeader}>
+                    <MaterialCommunityIcons name="information-outline" size={24} color={Colors.primaryColor} />
+                    <ThemedText type="defaultSemiBold" style={styles.descriptionTitle}>Description</ThemedText>
+                  </View>
+                  <ThemedText type="default" style={styles.descriptionText}>
+                    {agency?.description}
+                  </ThemedText>
+                </View>
+              )}
             </View>
           </Card.Content>
         </Card>
+        
+        {(!data || !data?.data?.length) && (
+          <TouchableOpacity 
+            style={styles.navigationButton}
+            onPress={openGoogleMaps}
+          >
+            <LinearGradient
+              colors={[Colors.light.tint, Colors.primaryColor]}
+              style={styles.navigationGradient}
+            >
+              <MaterialCommunityIcons name="navigation-variant" size={24} color="white" />
+              <ThemedText type="defaultSemiBold" style={styles.buttonText}>Voir le trajet</ThemedText>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
         
         <Card style={styles.actionCard}>
           <Card.Content>
@@ -190,35 +217,9 @@ const RoadAgency = () => {
                   <ThemedText type="defaultSemiBold" style={styles.buttonText}>Contacter la boutique</ThemedText>
                 </LinearGradient>
               </TouchableOpacity>
-              
-              {(!data || !data?.data?.length) && (
-                <TouchableOpacity 
-                  style={styles.actionButton}
-                  onPress={openGoogleMaps}
-                >
-                  <LinearGradient
-                    colors={[Colors.light.tint, Colors.primaryColor]}
-                    style={styles.buttonGradient}
-                  >
-                    <MaterialCommunityIcons name="navigation-variant" size={24} color="white" />
-                    <ThemedText type="defaultSemiBold" style={styles.buttonText}>Voir le trajet</ThemedText>
-                  </LinearGradient>
-                </TouchableOpacity>
-              )}
             </View>
           </Card.Content>
         </Card>
-        
-        {agency?.description && (
-          <Card style={styles.descriptionCard}>
-            <Card.Title title="Description" titleStyle={styles.cardTitle} />
-            <Card.Content>
-              <ThemedText type="default" style={styles.descriptionText}>
-                {agency?.description}
-              </ThemedText>
-            </Card.Content>
-          </Card>
-        )}
 
         {data && data?.data?.length ? (
           <Card style={[styles.statusCard, styles.visitComplete]}>
@@ -382,13 +383,40 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontSize: 16,
   },
-  descriptionCard: {
-    marginBottom: 16,
-    borderRadius: 16,
-    overflow: "hidden",
+  descriptionContainer: {
+    marginTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.1)",
+    paddingTop: 16,
+  },
+  descriptionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  descriptionTitle: {
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: "600",
+    color: Colors.primaryColor,
   },
   descriptionText: {
     lineHeight: 22,
+    paddingLeft: 32,
+  },
+  navigationButton: {
+    marginVertical: 16,
+    borderRadius: 12,
+    overflow: "hidden",
+    alignSelf: "center",
+    width: "90%", 
+  },
+  navigationGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    borderRadius: 12,
   },
   statusCard: {
     marginBottom: 16,
