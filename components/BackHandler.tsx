@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Pressable, useColorScheme } from "react-native";
+import { View, Pressable } from "react-native";
 import { ThemedText } from "./ThemedText";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Colors } from "@/constants/Colors";
@@ -19,7 +19,7 @@ export const BackHandler = ({ title }: { title: string }) => {
       >
         <Ionicons name="chevron-back" size={35} color={iconColor} />
       </Pressable>
-      <ThemedText type="subtitle" style={{ marginLeft: 10 }}>
+      <ThemedText type="default" style={{ marginLeft: 8 }}>
         {title}
       </ThemedText>
     </View>

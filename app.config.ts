@@ -4,13 +4,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Agent Tracker",
   slug: "agent-tracker",
-  version: "2.1.0",
+  version: "2.1.1",
   owner: "emmadal",
-  orientation: "portrait",
+  orientation: "default",
   icon: "./assets/images/icon.png",
   scheme: "agent",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
+  androidStatusBar: {
+    backgroundColor: "#3797cc",
+    barStyle: "light-content",
+  },
   description:
     "Agent tracker vous permet de garder le contact avec vos clients malgré le départ d'un commercial. Traquer vos points de vente et la présence de vos commerciaux sur le terrain n'est plus un mythe avec Agent Tracker",
   android: {
@@ -23,8 +27,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "android.permission.INTERNET",
       "android.permission.ACCESS_FINE_LOCATION",
       "android.permission.CAMERA",
-      "android.permission.READ_MEDIA_IMAGES", // Android 13+
+      // Modern media permissions for Android 13+
+      "android.permission.READ_MEDIA_IMAGES",
+      // Legacy storage permissions for Android 12 and below
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
     ],
+    // These permissions will be handled differently based on Android version
+    // The app needs to check & request permissions at runtime
     package: "com.agent.tracker",
     config: {
       googleMaps: {
@@ -91,6 +101,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         android: {
           usesCleartextTraffic: true,
+          minSdkVersion: 23,
+          enable16kPages: true,
         },
         ios: {
           deploymentTarget: "15.1",
