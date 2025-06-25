@@ -31,9 +31,7 @@
                 "gradleCommand": ":app:bundleRelease",
                 "applicationArchivePath": "android/app/build/outputs/bundle/release/app-release.aab",
                 "withoutCredentials": false,
-                "resourceClass": "default",
-                "ndkVersion": "26.1.10909125",
-                "buildConfiguration": "Release"
+                "resourceClass": "default"
             },
             "ios": {
                 "image": "latest"
