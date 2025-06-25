@@ -12,8 +12,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   androidStatusBar: {
-    backgroundColor: "#3797cc",
-    barStyle: "light-content",
+    barStyle: "dark-content",
   },
   description:
     "Agent tracker vous permet de garder le contact avec vos clients malgré le départ d'un commercial. Traquer vos points de vente et la présence de vos commerciaux sur le terrain n'est plus un mythe avec Agent Tracker",
@@ -101,7 +100,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         android: {
           usesCleartextTraffic: true,
-          minSdkVersion: 23,
           enable16kPages: true,
         },
         ios: {
