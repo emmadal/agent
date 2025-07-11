@@ -62,7 +62,7 @@ const Home = memo(() => {
             zoom: 18,
           }}
           markers={
-            data?.length <= 1000
+            data?.length <= 200
               ? data?.map((store) => ({
                   title: store.name,
                   coordinates: {
@@ -112,9 +112,9 @@ const Home = memo(() => {
       {data?.length ? <ShowAgency agencies={data} /> : null}
       <Button
         loading={loading}
-        title={loading ? "Patientez..." : "Affichage des boutiques"}
+        title="Affichage des boutiques"
         disabled={loading}
-        onPress={getStoreSaved}
+        onPress={() => router.navigate("/(rescue)/agency-list")}
         style={styles.btn}
       />
       <FAB
