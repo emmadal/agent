@@ -8,10 +8,7 @@ import SuspenseView from "@/components/SuspenseView";
 import { Searchbar } from "react-native-paper";
 import { Colors } from "@/constants/Colors";
 import { BackHandler } from "@/components/BackHandler";
-import {
-  LegendList,
-  LegendListRef,
-} from "@legendapp/list";
+import { LegendList, LegendListRef } from "@legendapp/list";
 import { ThemedText } from "@/components/ThemedText";
 
 const AgencyList = () => {
@@ -23,8 +20,11 @@ const AgencyList = () => {
   const filterResult = useMemo(() => {
     let result = data;
     if (searchQuery || searchQuery.trim() !== "") {
-      const searchResult = data?.filter((i: any) =>
-        i?.name.toLowerCase().includes(searchQuery?.toLowerCase()),
+      const searchResult = data?.filter(
+        (i: any) =>
+          i?.name?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+          i?.phone_gerant?.includes(searchQuery?.toLowerCase()) ||
+          i?.phone_boutique?.includes(searchQuery?.toLowerCase()),
       );
       result = searchResult?.reverse();
     }
