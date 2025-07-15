@@ -30,6 +30,7 @@ import { today } from "@/lib/today";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { BackHandler } from "@/components/BackHandler";
+import FormMTN from "@/components/form-mtn";
 
 type Inputs = z.infer<typeof visitSchema>;
 
@@ -45,6 +46,7 @@ const Visit = () => {
   const params = useLocalSearchParams();
   const agency = JSON.parse(params?.store as any);
   const [message, setMessage] = useState("");
+  const [mtnData, setMtnData] = useState();
 
   const onToggleSnackBar = () => setVisible(!visible);
   const onDismissSnackBar = () => setVisible(false);
@@ -121,7 +123,7 @@ const Visit = () => {
         team_user_id: Number(store?.team?.team_id),
         latitude: position?.latitude,
         longitude: position?.longitude,
-        montant: input.montant ? parseFloat(String(input.montant)) : 0,
+        // montant: input.montant ? parseFloat(String(input.montant)) : 0,
         type_visits_id: Number(input?.type_visits_id),
         visibility_id: Number(input?.visibility_id),
       };
@@ -158,7 +160,7 @@ const Visit = () => {
                   reset({
                     products: "",
                     comment: "",
-                    montant: "",
+                    // montant: "",
                   });
                   navigation.goBack();
                 });
@@ -190,221 +192,215 @@ const Visit = () => {
             showsVerticalScrollIndicator={false}
             contentInsetAdjustmentBehavior="automatic"
             keyboardShouldPersistTaps="always"
-          contentContainerStyle={styles.ContainerStyle}
-        >
-          <ThemedView style={styles.viewInput}>
-            <ThemedText type="defaultSemiBold" style={styles.label}>
-              Type de visite*
-            </ThemedText>
-            <Controller
-              control={control}
-              name="type_visits_id"
-              rules={{ required: true }}
-              render={() => (
-                <PaperSelect
-                  label=""
-                  value={visit.value}
-                  onSelection={async (value: any) => {
-                    setVisit({
-                      ...visit,
-                      value: value.text,
-                      selectedList: value.selectedList,
-                      error: "",
-                    });
-                    setValue("type_visits_id", value?.selectedList[0]?._id);
-                    await trigger("type_visits_id");
-                  }}
-                  arrayList={[...visit.list]}
-                  hideSearchBox
-                  selectedArrayList={visit.selectedList}
-                  errorText={visit.error}
-                  dialogDoneButtonText="Choisir"
-                  dialogCloseButtonText="Fermer"
-                  multiEnable={false}
-                  textColor={Colors[colorScheme ?? "light"].text}
-                  dialogTitleStyle={styles.dialogTitleStyle}
-                  dialogTitle="Type de visite"
-                  textInputOutlineStyle={{
-                    backgroundColor:
-                      colorScheme === "dark" ? "transparent" : "white",
-                    borderColor: "#DDDDE1",
-                    height: 53,
-                    // borderRadius: 10,
-                  }}
-                  dialogStyle={{
-                    backgroundColor: "white",
-                  }}
-                  dialogDoneButtonStyle={{
-                    color: Colors.light.text,
-                  }}
-                  dialogCloseButtonStyle={{
-                    color: Colors.light.text,
-                  }}
-                  textInputMode="outlined"
-                  checkboxProps={{
-                    checkboxMode: "ios",
-                    checkboxColor: Colors.primaryColor,
-                    checkboxLabelStyle: {
+            contentContainerStyle={styles.ContainerStyle}
+          >
+            <ThemedView style={styles.viewInput}>
+              <ThemedText type="defaultSemiBold" style={styles.label}>
+                Type de visite*
+              </ThemedText>
+              <Controller
+                control={control}
+                name="type_visits_id"
+                rules={{ required: true }}
+                render={() => (
+                  <PaperSelect
+                    label=""
+                    value={visit.value}
+                    onSelection={async (value: any) => {
+                      setVisit({
+                        ...visit,
+                        value: value.text,
+                        selectedList: value.selectedList,
+                        error: "",
+                      });
+                      setValue("type_visits_id", value?.selectedList[0]?._id);
+                      await trigger("type_visits_id");
+                    }}
+                    arrayList={[...visit.list]}
+                    hideSearchBox
+                    selectedArrayList={visit.selectedList}
+                    errorText={visit.error}
+                    dialogDoneButtonText="Choisir"
+                    dialogCloseButtonText="Fermer"
+                    multiEnable={false}
+                    textColor={Colors[colorScheme ?? "light"].text}
+                    dialogTitleStyle={styles.dialogTitleStyle}
+                    dialogTitle="Type de visite"
+                    textInputOutlineStyle={{
+                      backgroundColor:
+                        colorScheme === "dark" ? "transparent" : "white",
+                      borderColor: "#DDDDE1",
+                      height: 53,
+                      // borderRadius: 10,
+                    }}
+                    dialogStyle={{
+                      backgroundColor: "white",
+                    }}
+                    dialogDoneButtonStyle={{
                       color: Colors.light.text,
-                    },
-                  }}
-                  textInputProps={{
-                    activeOutlineColor: Colors.primaryColor,
-                    outlineColor: theme.colors.outline,
-                    underlineColor: "transparent",
-                  }}
-                />
-              )}
-            />
-            <ThemedText type="default" style={styles.error}>
-              {errors.type_visits_id?.message}
-            </ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.viewInput}>
-            <Controller
-              control={control}
-              name="montant"
-              rules={{ required: true }}
-              render={({ field: { onBlur, onChange, value } }) => (
-                <Input
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  label="Montant vente réalisé (FCFA)*"
-                  inputMode="numeric"
-                  keyboardType="number-pad"
-                />
-              )}
-            />
-            <ThemedText type="default" style={styles.error}>
-              {errors.montant?.message}
-            </ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.viewInput}>
-            <ThemedText type="defaultSemiBold" style={styles.label}>
-              Niveau de la visibilité*
-            </ThemedText>
-            <Controller
-              control={control}
-              name="visibility_id"
-              rules={{ required: true }}
-              render={() => (
-                <PaperSelect
-                  // label="Niveau de la visibilité"
-                  label=""
-                  value={visibility.value}
-                  textInputMode="outlined"
-                  onSelection={async (value: any) => {
-                    setVisibility({
-                      ...visibility,
-                      value: value.text,
-                      selectedList: value.selectedList,
-                      error: "",
-                    });
-                    setValue("visibility_id", value?.selectedList[0]?._id);
-                    await trigger("visibility_id");
-                  }}
-                  arrayList={[...visibility.list]}
-                  hideSearchBox
-                  selectedArrayList={visibility.selectedList}
-                  errorText={visibility.error}
-                  dialogDoneButtonText="Choisir"
-                  dialogCloseButtonText="Fermer"
-                  multiEnable={false}
-                  textColor={Colors[colorScheme ?? "light"].text}
-                  dialogTitleStyle={styles.dialogTitleStyle}
-                  dialogTitle="Niveau de la visibilité"
-                  textInputOutlineStyle={{
-                    backgroundColor:
-                      colorScheme === "dark" ? "transparent" : "white",
-                    borderColor: "#DDDDE1",
-                    height: 53,
-                  }}
-                  dialogStyle={{
-                    backgroundColor: "white",
-                  }}
-                  dialogDoneButtonStyle={{
-                    color: Colors.light.text,
-                  }}
-                  dialogCloseButtonStyle={{
-                    color: Colors.light.text,
-                  }}
-                  textInputStyle={{
-                    marginBottom: -9,
-                  }}
-                  checkboxProps={{
-                    checkboxMode: "ios",
-                    checkboxColor: Colors.primaryColor,
-                    checkboxLabelStyle: {
+                    }}
+                    dialogCloseButtonStyle={{
                       color: Colors.light.text,
-                    },
-                  }}
-                  textInputProps={{
-                    activeOutlineColor: Colors.primaryColor,
-                    outlineColor: theme.colors.outline,
-                    underlineColor: "transparent",
-                  }}
+                    }}
+                    textInputMode="outlined"
+                    checkboxProps={{
+                      checkboxMode: "ios",
+                      checkboxColor: Colors.primaryColor,
+                      checkboxLabelStyle: {
+                        color: Colors.light.text,
+                      },
+                    }}
+                    textInputProps={{
+                      activeOutlineColor: Colors.primaryColor,
+                      outlineColor: theme.colors.outline,
+                      underlineColor: "transparent",
+                    }}
+                  />
+                )}
+              />
+              <ThemedText type="default" style={styles.error}>
+                {errors.type_visits_id?.message}
+              </ThemedText>
+            </ThemedView>
+            <ThemedView style={styles.viewInput}>
+              <ThemedText type="defaultSemiBold" style={styles.label}>
+                Niveau de la visibilité*
+              </ThemedText>
+              <Controller
+                control={control}
+                name="visibility_id"
+                rules={{ required: true }}
+                render={() => (
+                  <PaperSelect
+                    // label="Niveau de la visibilité"
+                    label=""
+                    value={visibility.value}
+                    textInputMode="outlined"
+                    onSelection={async (value: any) => {
+                      setVisibility({
+                        ...visibility,
+                        value: value.text,
+                        selectedList: value.selectedList,
+                        error: "",
+                      });
+                      setValue("visibility_id", value?.selectedList[0]?._id);
+                      await trigger("visibility_id");
+                    }}
+                    arrayList={[...visibility.list]}
+                    hideSearchBox
+                    selectedArrayList={visibility.selectedList}
+                    errorText={visibility.error}
+                    dialogDoneButtonText="Choisir"
+                    dialogCloseButtonText="Fermer"
+                    multiEnable={false}
+                    textColor={Colors[colorScheme ?? "light"].text}
+                    dialogTitleStyle={styles.dialogTitleStyle}
+                    dialogTitle="Niveau de la visibilité"
+                    textInputOutlineStyle={{
+                      backgroundColor:
+                        colorScheme === "dark" ? "transparent" : "white",
+                      borderColor: "#DDDDE1",
+                      height: 53,
+                    }}
+                    dialogStyle={{
+                      backgroundColor: "white",
+                    }}
+                    dialogDoneButtonStyle={{
+                      color: Colors.light.text,
+                    }}
+                    dialogCloseButtonStyle={{
+                      color: Colors.light.text,
+                    }}
+                    textInputStyle={{
+                      marginBottom: -9,
+                    }}
+                    checkboxProps={{
+                      checkboxMode: "ios",
+                      checkboxColor: Colors.primaryColor,
+                      checkboxLabelStyle: {
+                        color: Colors.light.text,
+                      },
+                    }}
+                    textInputProps={{
+                      activeOutlineColor: Colors.primaryColor,
+                      outlineColor: theme.colors.outline,
+                      underlineColor: "transparent",
+                    }}
+                  />
+                )}
+              />
+              <ThemedText type="default" style={styles.error}>
+                {errors.visibility_id?.message}
+              </ThemedText>
+            </ThemedView>
+            {store.user?.customer_id !== 13 && (
+              <ThemedView style={styles.viewInput}>
+                <Controller
+                  control={control}
+                  name="products"
+                  rules={{ required: true }}
+                  render={({ field: { onBlur, onChange, value } }) => (
+                    <Input
+                      value={value}
+                      onBlur={onBlur}
+                      multiline
+                      onChangeText={onChange}
+                      label="Produits vendus*"
+                      style={styles.descInput}
+                    />
+                  )}
                 />
-              )}
-            />
-            <ThemedText type="default" style={styles.error}>
-              {errors.visibility_id?.message}
-            </ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.viewInput}>
-            <Controller
-              control={control}
-              name="products"
-              rules={{ required: true }}
-              render={({ field: { onBlur, onChange, value } }) => (
-                <Input
-                  value={value}
-                  onBlur={onBlur}
-                  multiline
-                  onChangeText={onChange}
-                  label="Produits vendus*"
-                  style={styles.descInput}
+                <ThemedText type="default" style={styles.error}>
+                  {errors.products?.message}
+                </ThemedText>
+              </ThemedView>
+            )}
+            {store.user?.customer_id === 13 && (
+              <FormMTN
+                token={token || store?.token!}
+                visibility_id={Number(visibility.value)}
+                type_visits_id={Number(visit.value)}
+              />
+            )}
+            {store.user?.customer_id !== 13 && (
+              <>
+                <ThemedView style={styles.viewInput}>
+                  <Controller
+                    control={control}
+                    name="comment"
+                    rules={{ required: true }}
+                    render={({ field: { onBlur, onChange, value } }) => (
+                      <Input
+                        value={value}
+                        onBlur={onBlur}
+                        multiline
+                        onChangeText={onChange}
+                        label="Difficultés ou problèmes à regler*"
+                        style={styles.descInput}
+                      />
+                    )}
+                  />
+                  <ThemedText type="default" style={styles.error}>
+                    {errors.comment?.message}
+                  </ThemedText>
+                </ThemedView>
+                <Button
+                  onPress={handleSubmit(handleForm)}
+                  title={`Enregister la visite de ${agency?.name}`}
+                  loading={mutation.isPending || isLoading || isSubmitting}
+                  disabled={mutation.isPending || isLoading || isSubmitting}
+                  style={styles.button}
                 />
-              )}
-            />
-            <ThemedText type="default" style={styles.error}>
-              {errors.products?.message}
-            </ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.viewInput}>
-            <Controller
-              control={control}
-              name="comment"
-              rules={{ required: true }}
-              render={({ field: { onBlur, onChange, value } }) => (
-                <Input
-                  value={value}
-                  onBlur={onBlur}
-                  multiline
-                  onChangeText={onChange}
-                  label="Difficultés ou problèmes à regler*"
-                  style={styles.descInput}
-                />
-              )}
-            />
-            <ThemedText type="default" style={styles.error}>
-              {errors.comment?.message}
-            </ThemedText>
-          </ThemedView>
-          <Button
-            onPress={handleSubmit(handleForm)}
-            title={`Enregister la visite de ${agency?.name}`}
-            loading={mutation.isPending || isLoading || isSubmitting}
-            disabled={mutation.isPending || isLoading || isSubmitting}
-            style={styles.button}
-          />
 
-          {(mutation.isError && mutation?.error) || errors.root?.message ? (
-            <ThemedText type="default" style={styles.errorupdate}>
-              {mutation.error?.message || errors?.root?.message}
-            </ThemedText>
-          ) : null}
-        </ScrollView>
+                {(mutation.isError && mutation?.error) ||
+                errors.root?.message ? (
+                  <ThemedText type="default" style={styles.errorupdate}>
+                    {mutation.error?.message || errors?.root?.message}
+                  </ThemedText>
+                ) : null}
+              </>
+            )}
+          </ScrollView>
         </View>
       </TouchableWithoutFeedback>
       <Snackbar

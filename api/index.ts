@@ -296,18 +296,6 @@ export const getCoworkers = async (teamId: string, token: string | null) => {
   }
 };
 
-export const getDistanceMatrix = async (origin: any, dest: any) => {
-  try {
-    const req = await fetch(
-      `https://maps.googleapis.com/maps/api/distancematrix/json?mode=driving&destinations=${dest.lat},${dest.long}&origins=${origin.lat},${origin.long}&key=${process.env.EXPO_PUBLIC_MAPS_API}`,
-    );
-    const response = await req.json();
-    return response;
-  } catch (error: any) {
-    throw new Error(error);
-  }
-};
-
 export const uploadCldFile = async (data: any, cloudName: string) => {
   const req = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
@@ -341,6 +329,22 @@ export const editPassword = async (data: any, token: string | null) => {
         body: JSON.stringify({ ...data }),
       },
     );
+    const response = await req.json();
+    return response;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+
+export const getActivityConcurent = async (token: string | null) => {
+  try {
+    const req = await fetch(`${API_URL}/activite-concurrents`, {
+      method: "GET",
+      headers: {
+        Accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    });
     const response = await req.json();
     return response;
   } catch (error: any) {

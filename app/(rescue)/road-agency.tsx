@@ -24,14 +24,15 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Card } from "react-native-paper";
 
 const RoadAgency = () => {
-  const colorScheme = useColorScheme();
   useToken();
+  const colorScheme = useColorScheme();
   const params = useLocalSearchParams();
   const agency = JSON.parse(params?.store as any);
   const { data } = useOneVisitByDate(agency && agency?.id);
   const position = usePosition();
   const [route, setRoute] = useState({ distanceMeters: 0, duration: "" });
   const [loading, setLoading] = useState(false);
+  const [loadDistance, setLoadDistance] = useState(false);
 
   const handleCall = async (phone: string) => {
     const canOpen = await Linking.canOpenURL(phone);
@@ -44,20 +45,27 @@ const RoadAgency = () => {
 
   useEffect(() => {
     const fallbackToGeolibDistance = () => {
-      const point1 = {
-        latitude: position?.latitude!,
-        longitude: position?.longitude!,
-      };
-      const point2 = {
-        latitude: agency?.latitude,
-        longitude: agency?.longitude,
-      };
-      const distance = getPreciseDistance(point1, point2, 1);
-
-      setRoute({
-        distanceMeters: distance,
-        duration: "",
-      });
+      try {
+        setLoadDistance(true);
+        const point1 = {
+          latitude: position?.latitude!,
+          longitude: position?.longitude!,
+        };
+        const point2 = {
+          latitude: agency?.latitude,
+          longitude: agency?.longitude,
+        };
+        const distance = getPreciseDistance(point1, point2, 1);
+        setRoute({
+          distanceMeters: distance,
+          duration: "",
+        });
+        setLoadDistance(false);
+      } catch (e) {
+        Alert.alert("Distance de la boutique", "Impossible de voir le trajet");
+      } finally {
+        setLoadDistance(false);
+      }
     };
 
     if (
@@ -91,7 +99,7 @@ const RoadAgency = () => {
   const processDistance = () => {
     if (route?.distanceMeters >= 1000) {
       const result = convertDistance(route?.distanceMeters, "km");
-      return `${result.toFixed(3)} km`;
+      return `${result.toFixed(2)} km`;
     }
     return `${route?.distanceMeters || 0} m`;
   };
@@ -106,57 +114,74 @@ const RoadAgency = () => {
         contentContainerStyle={styles.contentContainer}
       >
         <Card style={styles.headerCard}>
-            <Image
-              source={{ uri: agency?.picture }}
-              accessibilityLabel="logo-agency"
-              aria-label="logo-agency"
-              alt="logo-agency"
-              testID="logo-agency"
-              style={styles.storeImg}
-              onLoadStart={() => setLoading(true)}
-              onLoadEnd={() => setLoading(false)}
-            />
-            
-            <ActivityIndicator
-              style={styles.activityIndicator}
-              color={Colors.primaryColor}
-              animating={loading}
-            />
-            
-            <Card.Content style={styles.headerContent}>
-              <ThemedText type="bold" style={styles.agencyName}>
-                {agency?.name}
+          <Image
+            source={{ uri: agency?.picture }}
+            accessibilityLabel="logo-agency"
+            aria-label="logo-agency"
+            alt="logo-agency"
+            testID="logo-agency"
+            style={styles.storeImg}
+            onLoadStart={() => setLoading(true)}
+            onLoadEnd={() => setLoading(false)}
+          />
+
+          <ActivityIndicator
+            style={styles.activityIndicator}
+            color={Colors.primaryColor}
+            animating={loading}
+          />
+
+          <Card.Content style={styles.headerContent}>
+            <ThemedText type="bold" style={styles.agencyName}>
+              {agency?.name}
+            </ThemedText>
+            <View style={styles.viewaddress}>
+              <MaterialCommunityIcons
+                name="map-marker"
+                size={18}
+                color={Colors[colorScheme ?? "light"].text}
+              />
+              <ThemedText type="default" style={styles.addressText}>
+                {agency?.address}
               </ThemedText>
-              <View style={styles.viewaddress}>
-                <MaterialCommunityIcons
-                  name="map-marker"
-                  size={18}
-                  color={Colors[colorScheme ?? "light"].text}
-                />
-                <ThemedText type="default" style={styles.addressText}>
-                  {agency?.address}
-                </ThemedText>
-              </View>
-            </Card.Content>
+            </View>
+          </Card.Content>
         </Card>
-        
+
         <Card style={styles.infoCard}>
           <Card.Title title="Informations" titleStyle={styles.cardTitle} />
           <Card.Content>
             <View style={styles.infoContainer}>
               <View style={styles.infoItem}>
-                <MaterialCommunityIcons name="map-marker-distance" size={24} color={Colors.primaryColor} />
+                <MaterialCommunityIcons
+                  name="map-marker-distance"
+                  size={24}
+                  color={Colors.primaryColor}
+                />
                 <View style={styles.infoTextContainer}>
-                  <ThemedText type="default" style={styles.infoLabel}>Distance</ThemedText>
-                  <ThemedText type="bold" style={styles.infoValue}>{processDistance()}</ThemedText>
+                  <ThemedText type="default" style={styles.infoLabel}>
+                    Distance
+                  </ThemedText>
+                  <ThemedText type="defaultSemiBold" style={styles.infoValue}>
+                    {loadDistance ? "Chargement..." : processDistance()}
+                  </ThemedText>
                 </View>
               </View>
-              
+
               {agency?.description && (
                 <View style={styles.descriptionContainer}>
                   <View style={styles.descriptionHeader}>
-                    <MaterialCommunityIcons name="information-outline" size={24} color={Colors.primaryColor} />
-                    <ThemedText type="defaultSemiBold" style={styles.descriptionTitle}>Description</ThemedText>
+                    <MaterialCommunityIcons
+                      name="information-outline"
+                      size={24}
+                      color={Colors.primaryColor}
+                    />
+                    <ThemedText
+                      type="defaultSemiBold"
+                      style={styles.descriptionTitle}
+                    >
+                      Description
+                    </ThemedText>
                   </View>
                   <ThemedText type="default" style={styles.descriptionText}>
                     {agency?.description}
@@ -166,9 +191,9 @@ const RoadAgency = () => {
             </View>
           </Card.Content>
         </Card>
-        
+
         {(!data || !data?.data?.length) && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.navigationButton}
             onPress={openGoogleMaps}
           >
@@ -176,16 +201,22 @@ const RoadAgency = () => {
               colors={[Colors.light.tint, Colors.primaryColor]}
               style={styles.navigationGradient}
             >
-              <MaterialCommunityIcons name="navigation-variant" size={24} color="white" />
-              <ThemedText type="defaultSemiBold" style={styles.buttonText}>Voir le trajet</ThemedText>
+              <MaterialCommunityIcons
+                name="navigation-variant"
+                size={24}
+                color="white"
+              />
+              <ThemedText type="defaultSemiBold" style={styles.buttonText}>
+                Voir le trajet
+              </ThemedText>
             </LinearGradient>
           </TouchableOpacity>
         )}
-        
+
         <Card style={styles.actionCard}>
           <Card.Content>
             <View style={styles.buttonGroup}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.actionButton}
                 onPress={() => handleCall(`tel:${agency?.phone_gerant}`)}
               >
@@ -193,12 +224,18 @@ const RoadAgency = () => {
                   colors={[Colors.primaryColor, Colors.primaryColor]}
                   style={styles.buttonGradient}
                 >
-                  <MaterialCommunityIcons name="phone" size={24} color="white" />
-                  <ThemedText type="defaultSemiBold" style={styles.buttonText}>Appeler le gestionnaire</ThemedText>
+                  <MaterialCommunityIcons
+                    name="phone"
+                    size={24}
+                    color="white"
+                  />
+                  <ThemedText type="defaultSemiBold" style={styles.buttonText}>
+                    Appeler le Gestionnaire
+                  </ThemedText>
                 </LinearGradient>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={styles.actionButton}
                 onPress={() => handleCall(`tel:${agency?.phone_boutique}`)}
               >
@@ -206,8 +243,14 @@ const RoadAgency = () => {
                   colors={[Colors.primaryColor, Colors.primaryColor]}
                   style={styles.buttonGradient}
                 >
-                  <MaterialCommunityIcons name="store" size={24} color="white" />
-                  <ThemedText type="defaultSemiBold" style={styles.buttonText}>Contacter la boutique</ThemedText>
+                  <MaterialCommunityIcons
+                    name="store"
+                    size={24}
+                    color="white"
+                  />
+                  <ThemedText type="defaultSemiBold" style={styles.buttonText}>
+                    Contacter la boutique
+                  </ThemedText>
                 </LinearGradient>
               </TouchableOpacity>
             </View>
@@ -217,19 +260,29 @@ const RoadAgency = () => {
         {data && data?.data?.length ? (
           <Card style={[styles.statusCard, styles.visitComplete]}>
             <Card.Content style={styles.statusContent}>
-              <MaterialCommunityIcons name="check-circle" size={24} color="green" />
+              <MaterialCommunityIcons
+                name="check-circle"
+                size={24}
+                color="green"
+              />
               <ThemedText type="defaultSemiBold" style={styles.textVisit}>
                 Vous avez déjà effectuée une visite aujourd&apos;hui.
               </ThemedText>
             </Card.Content>
           </Card>
         ) : !route?.distanceMeters || route?.distanceMeters > 100 ? (
-          <Card style={[styles.statusCard, styles.visitError, { marginBottom: 30 }]}>
+          <Card
+            style={[styles.statusCard, styles.visitError, { marginBottom: 30 }]}
+          >
             <Card.Content style={styles.statusContent}>
-              <MaterialCommunityIcons name="alert-circle" size={24} color="red" />
+              <MaterialCommunityIcons
+                name="alert-circle"
+                size={24}
+                color="red"
+              />
               <ThemedText type="defaultSemiBold" style={styles.errorVisit}>
-                Vous ne pouvez pas effectuer de visite. Veuillez vous rapprocher de
-                la boutique.
+                Vous ne pouvez pas effectuer de visite. Veuillez vous rapprocher
+                de la boutique.
               </ThemedText>
             </Card.Content>
           </Card>
@@ -247,7 +300,11 @@ const RoadAgency = () => {
               colors={[Colors.primaryColor, Colors.light.tint]}
               style={styles.visitButtonGradient}
             >
-              <MaterialCommunityIcons name="clipboard-check" size={24} color="white" />
+              <MaterialCommunityIcons
+                name="clipboard-check"
+                size={24}
+                color="white"
+              />
               <ThemedText type="bold" style={styles.visitButtonText}>
                 Commencer la visite
               </ThemedText>
@@ -263,7 +320,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "transparent",
-    marginTop: 60
+    marginTop: 60,
   },
   scroll: {
     flex: 1,
@@ -402,7 +459,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: "hidden",
     alignSelf: "center",
-    width: "90%", 
+    width: "90%",
   },
   navigationGradient: {
     flexDirection: "row",
@@ -457,7 +514,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     marginLeft: 8,
-  }
+  },
 });
 
 export default RoadAgency;

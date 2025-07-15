@@ -84,7 +84,6 @@ export const storeSchema = z.object({
 
 export const visitSchema = z.object({
   store_id: z.number().optional(),
-  // team_user_id: z.number().optional(),
   longitude: z.number().optional(),
   latitude: z.number().optional(),
   comment: z
@@ -93,14 +92,37 @@ export const visitSchema = z.object({
     .trim(),
   type_visits_id: z.string({ required_error: "Champ obligatoire" }).trim(),
   visibility_id: z.string({ required_error: "Champ obligatoire" }).trim(),
-  montant: z
-    .string({ required_error: "Champ obligatoire" })
-    .regex(amountRegex, "Entrez un montant valide")
-    .trim(),
+  difficulty: z.string({ required_error: "Champ obligatoire" }).trim(),
   products: z
     .string({ required_error: "Champ obligatoire" })
     .min(3, "min 3 caractères")
     .trim(),
+});
+
+export const visitMTNSchema = z.object({
+  store_id: z.number().optional(),
+  longitude: z.number().optional(),
+  latitude: z.number().optional(),
+  comment: z
+      .string({ required_error: "Champ obligatoire" })
+      .min(3, "min 3 caractères")
+      .trim(),
+  type_visits_id: z.string({ required_error: "Champ obligatoire" }).trim(),
+  visibility_id: z.string({ required_error: "Champ obligatoire" }).trim(),
+  montant: z
+      .string({ required_error: "Champ obligatoire" })
+      .regex(amountRegex, "Entrez un montant valide")
+      .trim(),
+  branding_interne: z.string({ required_error: "Champ obligatoire" }).trim(),
+  visibility_concurence: z.string({ required_error: "Champ obligatoire" }).trim(),
+  registre_de_note: z.boolean({ required_error: "Champ obligatoire" }),
+  disponibilite_du_float: z.boolean({ required_error: "Champ obligatoire" }),
+  disponibilite_du_cash: z.boolean({ required_error: "Champ obligatoire" }),
+  activite_concurrence: z.string({ required_error: "Champ obligatoire" }).trim(),
+  activite_realisee: z.string({ required_error: "Champ obligatoire" }).trim(),
+  carte_commercant: z.boolean({ required_error: "Champ obligatoire" }),
+  difficulty: z.string({ required_error: "Champ obligatoire" }).trim(),
+  appreciation: z.string({ required_error: "Champ obligatoire" }),
 });
 
 export const editPasswordSchema = z

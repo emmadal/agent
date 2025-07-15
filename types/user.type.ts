@@ -5,7 +5,8 @@ export interface User {
   first_name: string;
   last_name: string;
   registration_number: string;
-  customer_id: string;
+  customer_id: number;
+  supervisor_id?: number;
   email: string;
   phone_number: string;
   picture?: string | null;
