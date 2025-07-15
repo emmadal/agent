@@ -75,6 +75,11 @@ export const storeSchema = z.object({
     .min(5, "min 5 caractères")
     .max(220, "220 caractères autorisé")
     .trim(),
+  ville: z
+    .string({ required_error: "Champ obligatoire" })
+    .min(3, "min 3 caractères")
+    .max(100, "100 caractères autorisé")
+    .trim(),
 });
 
 export const visitSchema = z.object({

@@ -225,6 +225,7 @@ const NewStore = () => {
                 picture: "",
                 name_gerant: "",
                 description: "",
+                ville: "",
               });
               setZone({
                 ...zone,
@@ -443,6 +444,24 @@ const NewStore = () => {
           />
           <ThemedText type="default" style={styles.error}>
             {errors.quartier_id?.message}
+          </ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.viewInput}>
+          <Controller
+            control={control}
+            name="ville"
+            rules={{ required: true }}
+            render={({ field: { onBlur, onChange, value } }) => (
+              <Input
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                label="Entrez le nom de la ville*"
+              />
+            )}
+          />
+          <ThemedText type="default" style={styles.error}>
+            {errors?.ville?.message}
           </ThemedText>
         </ThemedView>
         <ThemedView style={styles.viewInput}>
@@ -728,7 +747,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 15,
-  }
+  },
 });
 
 export default NewStore;
