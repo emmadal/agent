@@ -4,7 +4,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Agent Tracker",
   slug: "agent-tracker",
-  version: "2.1.1",
+  version: "3.0.0",
   owner: "emmadal",
   orientation: "default",
   icon: "./assets/images/icon.png",
@@ -22,7 +22,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#ffffff",
     },
     allowBackup: true,
-    permissions: ["android.permission.ACCESS_FINE_LOCATION"],
+    permissions: [
+      "android.permission.CAMERA",
+      "android.permission.ACCESS_FINE_LOCATION",
+    ],
     package: "com.agent.tracker",
     config: {
       googleMaps: {
