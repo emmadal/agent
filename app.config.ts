@@ -93,7 +93,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         android: {
           usesCleartextTraffic: true,
           enable16kPages: true,
-          minSdkVersion: 21,
+          minSdkVersion: 24,
         },
         ios: {
           deploymentTarget: "15.1",
