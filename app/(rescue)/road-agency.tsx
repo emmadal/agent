@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Alert,
   Linking,
@@ -11,7 +11,6 @@ import {
   View,
 } from "react-native";
 import useOneVisitByDate from "@/hooks/useOneVisitByDate";
-import { getPreciseDistance, convertDistance } from "geolib";
 import useToken from "@/hooks/useToken";
 import { ThemedText } from "@/components/ThemedText";
 import { useLocalSearchParams, router } from "expo-router";
@@ -22,6 +21,7 @@ import { Image } from "expo-image";
 import { BackHandler } from "@/components/BackHandler";
 import { LinearGradient } from "expo-linear-gradient";
 import { Card } from "react-native-paper";
+import { haversineDistance } from "@/lib/distance";
 
 const RoadAgency = () => {
   useToken();
@@ -30,9 +30,8 @@ const RoadAgency = () => {
   const agency = JSON.parse(params?.store as any);
   const { data } = useOneVisitByDate(agency && agency?.id);
   const position = usePosition();
-  const [route, setRoute] = useState({ distanceMeters: 0, duration: "" });
+  // const [route, setRoute] = useState({ distanceMeters: 0, duration: "" });
   const [loading, setLoading] = useState(false);
-  const [loadDistance, setLoadDistance] = useState(false);
 
   const handleCall = async (phone: string) => {
     const canOpen = await Linking.canOpenURL(phone);
@@ -43,45 +42,58 @@ const RoadAgency = () => {
     }
   };
 
-  useEffect(() => {
-    const fallbackToGeolibDistance = () => {
-      try {
-        setLoadDistance(true);
-        const point1 = {
-          latitude: position?.latitude!,
-          longitude: position?.longitude!,
-        };
-        const point2 = {
-          latitude: agency?.latitude,
-          longitude: agency?.longitude,
-        };
-        const distance = getPreciseDistance(point1, point2, 1);
-        setRoute({
-          distanceMeters: distance,
-          duration: "",
-        });
-        setLoadDistance(false);
-      } catch (e) {
-        Alert.alert("Distance de la boutique", "Impossible de voir le trajet");
-      } finally {
-        setLoadDistance(false);
-      }
-    };
-
-    if (
-      position?.latitude &&
-      position?.longitude &&
-      agency?.latitude &&
-      agency?.longitude
-    ) {
-      fallbackToGeolibDistance();
-    }
+  const distanceInMeters = useMemo(() => {
+    return haversineDistance(
+      position?.latitude!,
+      position?.longitude!,
+      agency?.latitude,
+      agency?.longitude,
+    );
   }, [
-    agency?.latitude,
-    agency?.longitude,
     position?.latitude,
     position?.longitude,
+    agency?.latitude,
+    agency?.longitude,
   ]);
+
+  // useEffect(() => {
+  //   const fallbackToGeolibDistance = () => {
+  //     try {
+  //       const point1 = {
+  //         latitude: position?.latitude!,
+  //         longitude: position?.longitude!,
+  //       };
+  //       const point2 = {
+  //         latitude: agency?.latitude,
+  //         longitude: agency?.longitude,
+  //       };
+  //       const distance = getPreciseDistance(point1, point2, 1);
+  //       setRoute({
+  //         distanceMeters: distance,
+  //         duration: "",
+  //       });
+  //       setLoadDistance(false);
+  //     } catch (e) {
+  //       Alert.alert("Distance de la boutique", "Impossible de voir le trajet");
+  //     } finally {
+  //       setLoadDistance(false);
+  //     }
+  //   };
+
+  //   if (
+  //     position?.latitude &&
+  //     position?.longitude &&
+  //     agency?.latitude &&
+  //     agency?.longitude
+  //   ) {
+  //     fallbackToGeolibDistance();
+  //   }
+  // }, [
+  //   agency?.latitude,
+  //   agency?.longitude,
+  //   position?.latitude,
+  //   position?.longitude,
+  // ]);
 
   const openGoogleMaps = async () => {
     const scheme = Platform.select({
@@ -96,13 +108,13 @@ const RoadAgency = () => {
     }
   };
 
-  const processDistance = () => {
-    if (route?.distanceMeters >= 1000) {
-      const result = convertDistance(route?.distanceMeters, "km");
-      return `${result.toFixed(2)} km`;
-    }
-    return `${route?.distanceMeters || 0} m`;
-  };
+  // const processDistance = () => {
+  //   if (route?.distanceMeters >= 1000) {
+  //     const result = convertDistance(route?.distanceMeters, "km");
+  //     return `${result.toFixed(2)} km`;
+  //   }
+  //   return `${route?.distanceMeters || 0} m`;
+  // };
 
   return (
     <View style={styles.container}>
@@ -163,7 +175,10 @@ const RoadAgency = () => {
                     Distance
                   </ThemedText>
                   <ThemedText type="defaultSemiBold" style={styles.infoValue}>
-                    {loadDistance ? "Chargement..." : processDistance()}
+                    {/* {loadDistance ? "Chargement..." : processDistance()} */}
+                    {distanceInMeters >= 1000
+                      ? `${(distanceInMeters / 1000).toFixed(2)} km`
+                      : `${distanceInMeters.toFixed(2)} m`}
                   </ThemedText>
                 </View>
               </View>
@@ -270,7 +285,8 @@ const RoadAgency = () => {
               </ThemedText>
             </Card.Content>
           </Card>
-        ) : !route?.distanceMeters || route?.distanceMeters > 100 ? (
+        ) : !distanceInMeters || distanceInMeters > 100 ? (
+          //!route?.distanceMeters || route?.distanceMeters > 100 ?
           <Card
             style={[styles.statusCard, styles.visitError, { marginBottom: 30 }]}
           >
