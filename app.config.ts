@@ -22,18 +22,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#ffffff",
     },
     allowBackup: true,
-    permissions: [
-      "android.permission.INTERNET",
-      "android.permission.ACCESS_FINE_LOCATION",
-      "android.permission.CAMERA",
-      // Modern media permissions for Android 13+
-      "android.permission.READ_MEDIA_IMAGES",
-      // Legacy storage permissions for Android 12 and below
-      "android.permission.READ_EXTERNAL_STORAGE",
-      "android.permission.WRITE_EXTERNAL_STORAGE",
-    ],
-    // These permissions will be handled differently based on Android version
-    // The app needs to check & request permissions at runtime
+    permissions: ["android.permission.ACCESS_FINE_LOCATION"],
     package: "com.agent.tracker",
     config: {
       googleMaps: {
@@ -101,6 +90,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         android: {
           usesCleartextTraffic: true,
           enable16kPages: true,
+          minSdkVersion: 21,
         },
         ios: {
           deploymentTarget: "15.1",
